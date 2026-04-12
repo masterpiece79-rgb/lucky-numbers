@@ -149,10 +149,55 @@ function drawBall(ctx, x, y, r, num) {
 
 function drawClover(ctx, x, y, size) {
   ctx.save();
-  ctx.font = `${size}px serif`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('🍀', x, y);
+  ctx.translate(x, y);
+  const s = size / 140; // 기준 사이즈 대비 스케일
+
+  // 글로우 효과
+  ctx.shadowColor = 'rgba(76, 217, 100, 0.6)';
+  ctx.shadowBlur = 30 * s;
+
+  // 네잎 클로버 그리기 (하트 4개)
+  const cloverColor = '#4CD964';
+  const darkColor = '#2FA844';
+  const leafSize = 32 * s;
+
+  function drawHeart(cx, cy, angle) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(angle);
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.bezierCurveTo(-leafSize * 0.8, -leafSize * 0.6, -leafSize * 1.1, -leafSize * 1.6, 0, -leafSize * 2.0);
+    ctx.bezierCurveTo(leafSize * 1.1, -leafSize * 1.6, leafSize * 0.8, -leafSize * 0.6, 0, 0);
+    ctx.closePath();
+    ctx.fillStyle = cloverColor;
+    ctx.fill();
+    // 잎맥 (약간 어두운 선)
+    ctx.beginPath();
+    ctx.moveTo(0, -2 * s);
+    ctx.lineTo(0, -leafSize * 1.6);
+    ctx.strokeStyle = darkColor;
+    ctx.lineWidth = 2 * s;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // 4개의 잎 (상하좌우)
+  drawHeart(0, -8 * s, 0);                // 위
+  drawHeart(0, 8 * s, Math.PI);           // 아래
+  drawHeart(-8 * s, 0, -Math.PI / 2);     // 왼쪽
+  drawHeart(8 * s, 0, Math.PI / 2);       // 오른쪽
+
+  // 줄기
+  ctx.shadowBlur = 0;
+  ctx.beginPath();
+  ctx.moveTo(2 * s, 10 * s);
+  ctx.quadraticCurveTo(8 * s, 40 * s, 4 * s, 55 * s);
+  ctx.strokeStyle = darkColor;
+  ctx.lineWidth = 4 * s;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+
   ctx.restore();
 }
 
