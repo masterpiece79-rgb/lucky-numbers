@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>행운의 번호 - 에셋 생성기</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #111;
+    color: #fff;
+    padding: 32px 24px;
+  }
+  h1 { text-align: center; margin-bottom: 8px; font-size: 24px; }
+  .subtitle { text-align: center; color: #888; margin-bottom: 32px; font-size: 14px; }
+  .section-label { font-size: 13px; color: #888; margin: 24px 0 12px; text-transform: uppercase; letter-spacing: 1px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+  .card {
+    background: #1a1a1a;
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .card canvas { max-width: 100%; height: auto; border-radius: 8px; }
+  .card h3 { font-size: 14px; font-weight: 700; }
+  .card p { font-size: 12px; color: #666; }
+  .card button {
+    padding: 8px 20px;
+    background: #FFD700;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a1a1a;
+    cursor: pointer;
+  }
+  .card button:hover { opacity: 0.85; }
+  .batch-btn {
+    display: block;
+    margin: 24px auto;
+    padding: 14px 32px;
+    background: #7C3AED;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<h1>행운의 번호 - 에셋 생성기</h1>
+<p class="subtitle">토스 앱인토스 스토어 제출용 이미지</p>
+
+<div class="section-label">앱 로고 (600x600)</div>
+<div class="grid">
+  <div class="card">
+    <canvas id="logo-light" width="600" height="600"></canvas>
+    <h3>로고 라이트</h3><p>600 x 600</p>
+    <button onclick="dl('logo-light','lucky-numbers-logo-light.png')">다운로드</button>
+  </div>
+  <div class="card">
+    <canvas id="logo-dark" width="600" height="600"></canvas>
+    <h3>로고 다크</h3><p>600 x 600</p>
+    <button onclick="dl('logo-dark','lucky-numbers-logo-dark.png')">다운로드</button>
+  </div>
+</div>
+
+<div class="section-label">OG 이미지 (1200x600)</div>
+<div class="grid">
+  <div class="card">
+    <canvas id="og-image" width="1200" height="600"></canvas>
+    <h3>OG 이미지</h3><p>1200 x 600</p>
+    <button onclick="dl('og-image','lucky-numbers-og.png')">다운로드</button>
+  </div>
+</div>
+
+<div class="section-label">가로형 썸네일 (1932x828)</div>
+<div class="grid">
+  <div class="card">
+    <canvas id="thumbnail" width="1932" height="828"></canvas>
+    <h3>가로형 썸네일</h3><p>1932 x 828</p>
+    <button onclick="dl('thumbnail','lucky-numbers-thumbnail.png')">다운로드</button>
+  </div>
+</div>
+
+<div class="section-label">세로형 스크린샷 (636x1048)</div>
+<div class="grid">
+  <div class="card">
+    <canvas id="ss-onboarding" width="636" height="1048"></canvas>
+    <h3>스크린샷 1 - 온보딩</h3><p>636 x 1048</p>
+    <button onclick="dl('ss-onboarding','lucky-numbers-ss1.png')">다운로드</button>
+  </div>
+  <div class="card">
+    <canvas id="ss-stats" width="636" height="1048"></canvas>
+    <h3>스크린샷 2 - 통계</h3><p>636 x 1048</p>
+    <button onclick="dl('ss-stats','lucky-numbers-ss2.png')">다운로드</button>
+  </div>
+  <div class="card">
+    <canvas id="ss-result" width="636" height="1048"></canvas>
+    <h3>스크린샷 3 - 결과</h3><p>636 x 1048</p>
+    <button onclick="dl('ss-result','lucky-numbers-ss3.png')">다운로드</button>
+  </div>
+</div>
+
+<button class="batch-btn" onclick="downloadAll()">전체 다운로드</button>
+
+<script>
+const BG = '#0a0e27';
+const GOLD = '#FFD700';
+const PURPLE = '#7C3AED';
+const FONT = '-apple-system, BlinkMacSystemFont, sans-serif';
+const BALL_COLORS = ['#FBC400','#69C8F2','#FF7272','#AAAAAA','#B0D840'];
+
+function ballColor(n) {
+  if (n <= 10) return BALL_COLORS[0];
+  if (n <= 20) return BALL_COLORS[1];
+  if (n <= 30) return BALL_COLORS[2];
+  if (n <= 40) return BALL_COLORS[3];
+  return BALL_COLORS[4];
+}
+
+function drawBall(ctx, x, y, r, num) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fillStyle = ballColor(num);
+  ctx.fill();
+  // 하이라이트
+  ctx.beginPath();
+  ctx.ellipse(x - r*0.2, y - r*0.35, r*0.28, r*0.18, -0.35, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.fill();
+  // 숫자
+  ctx.fillStyle = '#fff';
+  ctx.font = `bold ${r*0.9}px ${FONT}`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = 'rgba(0,0,0,0.25)';
+  ctx.shadowBlur = 2;
+  ctx.fillText(num, x, y + 1);
+  ctx.restore();
+}
+
+function drawClover(ctx, x, y, size) {
+  ctx.save();
+  ctx.font = `${size}px serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('🍀', x, y);
+  ctx.restore();
+}
+
+function drawGradientBG(ctx, w, h, r) {
+  const grad = ctx.createLinearGradient(0, 0, w, h);
+  grad.addColorStop(0, '#0a0e27');
+  grad.addColorStop(1, '#151a3a');
+  ctx.fillStyle = grad;
+  if (r > 0) {
+    ctx.beginPath();
+    ctx.roundRect(0, 0, w, h, r);
+    ctx.fill();
+  } else {
+    ctx.fillRect(0, 0, w, h);
+  }
+}
+
+function drawGoldText(ctx, text, x, y, size) {
+  ctx.save();
+  const grad = ctx.createLinearGradient(x - 100, y, x + 100, y);
+  grad.addColorStop(0, GOLD);
+  grad.addColorStop(1, '#FFA500');
+  ctx.fillStyle = grad;
+  ctx.font = `900 ${size}px ${FONT}`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, x, y);
+  ctx.restore();
+}
+
+// === 로고 라이트 ===
+function renderLogoLight() {
+  const c = document.getElementById('logo-light');
+  const ctx = c.getContext('2d');
+  // 밝은 배경
+  const grad = ctx.createRadialGradient(300, 300, 50, 300, 300, 350);
+  grad.addColorStop(0, '#1a2040');
+  grad.addColorStop(1, '#0a0e27');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.roundRect(0, 0, 600, 600, 100);
+  ctx.fill();
+  // 글로우
+  const glow = ctx.createRadialGradient(300, 240, 20, 300, 240, 200);
+  glow.addColorStop(0, 'rgba(255,215,0,0.15)');
+  glow.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, 600, 600);
+  // 클로버
+  drawClover(ctx, 300, 230, 140);
+  // 텍스트
+  drawGoldText(ctx, '행운의', 300, 400, 60);
+  drawGoldText(ctx, '번호', 300, 475, 60);
+}
+
+// === 로고 다크 ===
+function renderLogoDark() {
+  const c = document.getElementById('logo-dark');
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.roundRect(0, 0, 600, 600, 100);
+  ctx.fill();
+  const glow = ctx.createRadialGradient(300, 240, 20, 300, 240, 200);
+  glow.addColorStop(0, 'rgba(124,58,237,0.2)');
+  glow.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, 600, 600);
+  drawClover(ctx, 300, 230, 140);
+  drawGoldText(ctx, '행운의', 300, 400, 60);
+  drawGoldText(ctx, '번호', 300, 475, 60);
+}
+
+// === OG 이미지 ===
+function renderOG() {
+  const c = document.getElementById('og-image');
+  const ctx = c.getContext('2d');
+  drawGradientBG(ctx, 1200, 600, 0);
+  // 글로우
+  const glow = ctx.createRadialGradient(600, 300, 50, 600, 300, 400);
+  glow.addColorStop(0, 'rgba(255,215,0,0.1)');
+  glow.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, 1200, 600);
+  // 왼쪽: 클로버 + 텍스트
+  drawClover(ctx, 350, 220, 120);
+  drawGoldText(ctx, '행운의 번호', 350, 380, 56);
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.font = `500 24px ${FONT}`;
+  ctx.textAlign = 'center';
+  ctx.fillText('과거 로또 통계로 찾는 나만의 행운', 350, 440);
+  // 오른쪽: 로또 공
+  const balls = [7, 14, 27, 34, 42];
+  balls.forEach((n, i) => {
+    drawBall(ctx, 750 + i * 85, 300, 35, n);
+  });
+}
+
+// === 가로형 썸네일 ===
+function renderThumbnail() {
+  const c = document.getElementById('thumbnail');
+  const ctx = c.getContext('2d');
+  drawGradientBG(ctx, 1932, 828, 0);
+  const glow = ctx.createRadialGradient(966, 414, 80, 966, 414, 500);
+  glow.addColorStop(0, 'rgba(124,58,237,0.12)');
+  glow.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, 1932, 828);
+  // 클로버
+  drawClover(ctx, 500, 340, 160);
+  drawGoldText(ctx, '행운의 번호', 500, 560, 72);
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.font = `500 30px ${FONT}`;
+  ctx.textAlign = 'center';
+  ctx.fillText('1,200회차+ 역대 당첨 통계 분석', 500, 640);
+  // 오른쪽: 큰 로또 공
+  const balls = [3, 15, 28, 36, 44];
+  balls.forEach((n, i) => {
+    drawBall(ctx, 1050 + i * 110, 380, 45, n);
+  });
+  // 카드 UI 힌트
+  ctx.fillStyle = 'rgba(255,255,255,0.06)';
+  ctx.beginPath();
+  ctx.roundRect(1020, 480, 500, 80, 16);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.35)';
+  ctx.font = `700 24px ${FONT}`;
+  ctx.textAlign = 'center';
+  ctx.fillText('6가지 행운 조건으로 번호 추천', 1270, 530);
+}
+
+// === 스크린샷 1: 온보딩 ===
+function renderSS1() {
+  const c = document.getElementById('ss-onboarding');
+  const ctx = c.getContext('2d');
+  drawGradientBG(ctx, 636, 1048, 0);
+  drawClover(ctx, 318, 240, 120);
+  drawGoldText(ctx, '행운의 번호', 318, 400, 48);
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.font = `500 22px ${FONT}`;
+  ctx.textAlign = 'center';
+  ctx.fillText('과거 로또 당첨 통계로 찾는', 318, 460);
+  ctx.fillText('나만의 행운 번호', 318, 490);
+  // 특징 카드
+  const features = [
+    ['📊', '1,200회차+ 데이터 분석'],
+    ['🎯', '6가지 행운 조건'],
+    ['🃏', '행운의 번호 3개 추천'],
+  ];
+  features.forEach(([emoji, text], i) => {
+    const y = 560 + i * 70;
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.beginPath();
+    ctx.roundRect(60, y, 516, 56, 14);
+    ctx.fill();
+    ctx.font = `28px serif`;
+    ctx.textAlign = 'left';
+    ctx.fillText(emoji, 82, y + 34);
+    ctx.fillStyle = '#fff';
+    ctx.font = `600 18px ${FONT}`;
+    ctx.fillText(text, 126, y + 36);
+  });
+  // CTA
+  ctx.fillStyle = GOLD;
+  ctx.beginPath();
+  ctx.roundRect(100, 850, 436, 56, 14);
+  ctx.fill();
+  ctx.fillStyle = '#1a1a1a';
+  ctx.font = `800 20px ${FONT}`;
+  ctx.textAlign = 'center';
+  ctx.fillText('행운 뽑기 시작', 318, 884);
+}
+
+// === 스크린샷 2: 통계 ===
+function renderSS2() {
+  const c = document.getElementById('ss-stats');
+  const ctx = c.getContext('2d');
+  drawGradientBG(ctx, 636, 1048, 0);
+  ctx.fillStyle = '#fff';
+  ctx.font = `800 28px ${FONT}`;
+  ctx.textAlign = 'center';
+  ctx.fillText('📊 역대 당첨 통계', 318, 70);
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.font = `400 16px ${FONT}`;
+  ctx.fillText('1회~1219회 총 1219회차 분석', 318, 105);
+  // 직전 당첨
+  ctx.fillStyle = 'rgba(124,58,237,0.12)';
+  ctx.beginPath();
+  ctx.roundRect(40, 140, 556, 140, 16);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(124,58,237,0.25)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.fillStyle = GOLD;
+  ctx.font = `800 18px ${FONT}`;
+  ctx.textAlign = 'center';
+  ctx.fillText('제1219회  2026.04.11', 318, 178);
+  const latest = [1, 2, 15, 28, 39, 45];
+  latest.forEach((n, i) => drawBall(ctx, 130 + i * 75, 235, 28, n));
+  // 통계 카드
+  function drawStatCard(x, y, title, balls) {
+    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+    ctx.beginPath();
+    ctx.roundRect(x, y, 265, 170, 14);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.font = `700 13px ${FONT}`;
+    ctx.textAlign = 'left';
+    ctx.fillText(title, x + 14, y + 30);
+    balls.forEach((n, i) => {
+      const bx = x + 30 + (i % 4) * 58;
+      const by = y + 70 + Math.floor(i / 4) * 60;
+      drawBall(ctx, bx, by, 22, n);
+    });
+  }
+  drawStatCard(40, 310, '🔥 자주 뽑힌 TOP 5', [34, 27, 12, 13, 45]);
+  drawStatCard(330, 310, '❄️ 안 뽑힌 TOP 5', [9, 22, 32, 41, 23]);
+  drawStatCard(40, 510, '📅 4월에 자주 뽑힌', [16, 32, 36, 40, 4]);
+  drawStatCard(330, 510, '🌙 4월에 안 뽑힌', [42, 7, 6, 27, 25]);
+  // CTA
+  ctx.fillStyle = GOLD;
+  ctx.beginPath();
+  ctx.roundRect(100, 740, 436, 56, 14);
+  ctx.fill();
+  ctx.fillStyle = '#1a1a1a';
+  ctx.font = `800 20px ${FONT}`;
+  ctx.textAlign = 'center';
+  ctx.fillText('행운 번호 뽑기', 318, 774);
+}
+
+// === 스크린샷 3: 결과 ===
+function renderSS3() {
+  const c = document.getElementById('ss-result');
+  const ctx = c.getContext('2d');
+  drawGradientBG(ctx, 636, 1048, 0);
+  // 글로우
+  const glow = ctx.createRadialGradient(318, 300, 30, 318, 300, 250);
+  glow.addColorStop(0, 'rgba(255,215,0,0.1)');
+  glow.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, 636, 1048);
+  ctx.fillStyle = '#fff';
+  ctx.font = `800 28px ${FONT}`;
+  ctx.textAlign = 'center';
+  ctx.fillText('🍀 당신의 행운 번호', 318, 120);
+  // 조건 태그
+  ctx.fillStyle = 'rgba(124,58,237,0.2)';
+  ctx.beginPath();
+  ctx.roundRect(180, 150, 120, 32, 16);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.roundRect(316, 150, 140, 32, 16);
+  ctx.fill();
+  ctx.fillStyle = '#C4B5FD';
+  ctx.font = `600 14px ${FONT}`;
+  ctx.fillText('🔥 뜨거운 번호', 240, 171);
+  ctx.fillText('📅 이달의 행운', 386, 171);
+  // 카드 + 공
+  const nums = [10, 28, 45];
+  nums.forEach((n, i) => {
+    const x = 130 + i * 130;
+    // 카드 배경
+    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+    ctx.strokeStyle = 'rgba(255,215,0,0.35)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.roundRect(x - 52, 220, 104, 140, 16);
+    ctx.fill();
+    ctx.stroke();
+    drawBall(ctx, x, 290, 40, n);
+  });
+  // 추가 번호
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.font = `700 14px ${FONT}`;
+  ctx.fillText('추가 행운번호', 318, 420);
+  const extra = [3, 19, 31];
+  extra.forEach((n, i) => {
+    drawBall(ctx, 200 + i * 120, 475, 40, n);
+  });
+  // 디스클레이머
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.font = `400 14px ${FONT}`;
+  ctx.fillText('이 번호는 과거 통계 기반 재미 추천이며,', 318, 560);
+  ctx.fillText('당첨을 보장하지 않습니다.', 318, 582);
+  // CTA
+  ctx.fillStyle = GOLD;
+  ctx.beginPath();
+  ctx.roundRect(100, 850, 436, 56, 14);
+  ctx.fill();
+  ctx.fillStyle = '#1a1a1a';
+  ctx.font = `800 20px ${FONT}`;
+  ctx.textAlign = 'center';
+  ctx.fillText('다시 뽑기', 318, 884);
+}
+
+// === 다운로드 ===
+function dl(id, filename) {
+  const c = document.getElementById(id);
+  const a = document.createElement('a');
+  a.download = filename;
+  a.href = c.toDataURL('image/png');
+  a.click();
+}
+
+function downloadAll() {
+  const assets = [
+    ['logo-light', 'lucky-numbers-logo-light.png'],
+    ['logo-dark', 'lucky-numbers-logo-dark.png'],
+    ['og-image', 'lucky-numbers-og.png'],
+    ['thumbnail', 'lucky-numbers-thumbnail.png'],
+    ['ss-onboarding', 'lucky-numbers-ss1.png'],
+    ['ss-stats', 'lucky-numbers-ss2.png'],
+    ['ss-result', 'lucky-numbers-ss3.png'],
+  ];
+  assets.forEach(([id, name], i) => {
+    setTimeout(() => dl(id, name), i * 300);
+  });
+}
+
+// 렌더링 실행
+renderLogoLight();
+renderLogoDark();
+renderOG();
+renderThumbnail();
+renderSS1();
+renderSS2();
+renderSS3();
+</script>
+</body>
+</html>

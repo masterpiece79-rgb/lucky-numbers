@@ -9,9 +9,11 @@ import {
   getBallClass
 } from './lotto-data.js'
 import { generateLuckyNumbers } from './generator.js'
+import { showTossInterstitialAd, showTossRewardedAd } from './toss-sdk.js'
 
 // --- State ---
 let lottoData = null
+let isInToss = typeof window !== 'undefined' && !!window.__APPS_IN_TOSS__
 let selectedConditions = []
 let currentNumbers = [] // 현재 생성된 전체 6개 번호
 
@@ -118,7 +120,7 @@ function setupConditions() {
 }
 
 // --- Ad (전면 광고 - 매번 번호 생성 시) ---
-function showInterstitialAd() {
+function showFallbackInterstitialAd() {
   return new Promise((resolve) => {
     adOverlay.classList.remove('hidden')
     adCloseBtn.disabled = true
@@ -143,6 +145,25 @@ function showInterstitialAd() {
       resolve()
     }
   })
+}
+
+async function showInterstitialAd() {
+  if (isInToss) {
+    const shown = await showTossInterstitialAd()
+    if (shown) return
+    // 토스 광고 실패 시 fallback
+  }
+  return showFallbackInterstitialAd()
+}
+
+async function showRewardedAd() {
+  if (isInToss) {
+    const rewarded = await showTossRewardedAd()
+    if (rewarded) return true
+    // 토스 광고 실패 시 fallback
+  }
+  await showFallbackInterstitialAd()
+  return true
 }
 
 // --- Result Rendering ---
@@ -197,7 +218,8 @@ async function showResult() {
 
 // --- 6개 한번에 보기 (보상형 광고) ---
 async function showExtraNumbers() {
-  await showInterstitialAd()
+  const rewarded = await showRewardedAd()
+  if (!rewarded) return
 
   const extra3 = currentNumbers.slice(3)
   const extraBalls = document.getElementById('extra-balls')

@@ -70,6 +70,95 @@ export async function shareApp(sdk) {
   }
 }
 
+// --- 광고 SDK ---
+const AD_GROUP_ID_INTERSTITIAL = 'ait-ad-test-interstitial-id'
+const AD_GROUP_ID_REWARDED = 'ait-ad-test-rewarded-id'
+
+/**
+ * 토스 전면 광고 표시 (interstitial)
+ * @returns {Promise<boolean>} 광고 표시 성공 여부
+ */
+export async function showTossInterstitialAd() {
+  if (!isInTossApp()) return false
+
+  try {
+    const { loadFullScreenAd, showFullScreenAd } = await import('@apps-in-toss/web-framework')
+
+    const ad = await loadFullScreenAd({ adGroupId: AD_GROUP_ID_INTERSTITIAL })
+
+    return new Promise((resolve) => {
+      ad.on('loaded', async () => {
+        console.log('[Ad] 전면 광고 로드 완료')
+        try {
+          await showFullScreenAd(ad)
+        } catch (e) {
+          console.error('[Ad] 전면 광고 표시 실패:', e)
+          resolve(false)
+        }
+      })
+
+      ad.on('dismissed', () => {
+        console.log('[Ad] 전면 광고 닫힘')
+        resolve(true)
+      })
+
+      ad.on('error', (err) => {
+        console.error('[Ad] 전면 광고 에러:', err)
+        resolve(false)
+      })
+    })
+  } catch (error) {
+    console.error('[Ad] 전면 광고 SDK 로드 실패:', error)
+    return false
+  }
+}
+
+/**
+ * 토스 보상형 광고 표시 (rewarded)
+ * @returns {Promise<boolean>} 보상 획득 여부
+ */
+export async function showTossRewardedAd() {
+  if (!isInTossApp()) return false
+
+  try {
+    const { loadFullScreenAd, showFullScreenAd } = await import('@apps-in-toss/web-framework')
+
+    const ad = await loadFullScreenAd({ adGroupId: AD_GROUP_ID_REWARDED })
+
+    return new Promise((resolve) => {
+      let rewarded = false
+
+      ad.on('loaded', async () => {
+        console.log('[Ad] 보상형 광고 로드 완료')
+        try {
+          await showFullScreenAd(ad)
+        } catch (e) {
+          console.error('[Ad] 보상형 광고 표시 실패:', e)
+          resolve(false)
+        }
+      })
+
+      ad.on('userEarnedReward', () => {
+        console.log('[Ad] 보상 획득!')
+        rewarded = true
+      })
+
+      ad.on('dismissed', () => {
+        console.log('[Ad] 보상형 광고 닫힘, rewarded:', rewarded)
+        resolve(rewarded)
+      })
+
+      ad.on('error', (err) => {
+        console.error('[Ad] 보상형 광고 에러:', err)
+        resolve(false)
+      })
+    })
+  } catch (error) {
+    console.error('[Ad] 보상형 광고 SDK 로드 실패:', error)
+    return false
+  }
+}
+
 export function hapticFeedback(type = 'light') {
   if (navigator.vibrate) {
     switch (type) {
@@ -90,4 +179,6 @@ export default {
   initTossSDK,
   shareApp,
   hapticFeedback,
+  showTossInterstitialAd,
+  showTossRewardedAd,
 };
