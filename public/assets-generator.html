@@ -237,9 +237,7 @@ function renderLogoLight() {
   grad.addColorStop(0, '#1a2040');
   grad.addColorStop(1, '#0a0e27');
   ctx.fillStyle = grad;
-  ctx.beginPath();
-  ctx.roundRect(0, 0, 600, 600, 100);
-  ctx.fill();
+  ctx.fillRect(0, 0, 600, 600);
   // 글로우
   const glow = ctx.createRadialGradient(300, 240, 20, 300, 240, 200);
   glow.addColorStop(0, 'rgba(255,215,0,0.15)');
@@ -258,9 +256,7 @@ function renderLogoDark() {
   const c = document.getElementById('logo-dark');
   const ctx = c.getContext('2d');
   ctx.fillStyle = '#000';
-  ctx.beginPath();
-  ctx.roundRect(0, 0, 600, 600, 100);
-  ctx.fill();
+  ctx.fillRect(0, 0, 600, 600);
   const glow = ctx.createRadialGradient(300, 240, 20, 300, 240, 200);
   glow.addColorStop(0, 'rgba(124,58,237,0.2)');
   glow.addColorStop(1, 'transparent');
