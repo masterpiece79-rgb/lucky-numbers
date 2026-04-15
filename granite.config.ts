@@ -5,7 +5,7 @@ export default defineConfig({
   brand: {
     displayName: "행운의 번호",
     primaryColor: "#FFD700",
-    icon: "./public/icon.png",
+    icon: "https://lucky-numbers-miniapp.vercel.app/icon.png",
   },
   web: {
     host: "localhost",
