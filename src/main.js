@@ -184,6 +184,7 @@ async function showResult() {
     await showInterstitialAd()
   }
 
+  // 6개 번호 생성 (중복 없이)
   const first3 = generateLuckyNumbers(selectedConditions, lottoData)
   const extra3 = generateLuckyNumbers(selectedConditions, lottoData)
   const allUsed = new Set(first3)
@@ -193,23 +194,20 @@ async function showResult() {
     }
     allUsed.add(extra3[i])
   }
-  extra3.sort((a, b) => a - b)
-  currentNumbers = [...first3, ...extra3]
+  const sixNumbers = [...first3, ...extra3].sort((a, b) => a - b)
+  currentNumbers = sixNumbers
   currentTargetDrawNo = getLatestRound(lottoData).draw_no + 1
   currentSaved = false
-  console.log('[Result]', selectedConditions, '→', first3, '+', extra3)
+  console.log('[Result]', selectedConditions, '→', sixNumbers)
 
-  const tagsContainer = document.getElementById('result-conditions')
-  tagsContainer.innerHTML = selectedConditions
+  // 조건 태그 렌더링
+  document.getElementById('result-conditions').innerHTML = selectedConditions
     .map(c => `<span class="condition-tag">${conditionLabels[c]}</span>`)
     .join('')
 
+  // 카드 리셋
   const cards = document.querySelectorAll('#result-cards .result-card')
   cards.forEach(card => card.classList.remove('flipped'))
-
-  document.getElementById('unlock-full').classList.remove('hidden')
-  document.getElementById('extra-numbers').classList.add('hidden')
-  document.getElementById('extra-balls').innerHTML = ''
 
   // 보관함 버튼 리셋
   const saveBtn = document.getElementById('btn-save-vault')
@@ -222,34 +220,30 @@ async function showResult() {
   document.getElementById('five-game-result').classList.add('hidden')
   document.getElementById('five-game-list').innerHTML = ''
 
+  // 다시뽑기/처음으로 액션 숨김 (저장 후 노출)
+  document.getElementById('result-actions').classList.add('hidden')
+
   switchScreen('result')
 
+  // 카드 플립 애니메이션 — 6개를 1.5초 내 완결
+  // 앞 3개: 각 0.35초 간격 | 뒤 3개: 살짝 간격 주고 빠르게 추가
   for (let i = 0; i < 3; i++) {
-    await delay(500)
-    const card = cards[i]
-    const ball = card.querySelector('.result-ball')
-    const num = first3[i]
-    ball.className = `result-ball ${getBallClass(num)}`
-    ball.textContent = num
-    card.classList.add('flipped')
+    await delay(i === 0 ? 350 : 350)
+    flipCard(cards[i], sixNumbers[i])
+    haptic('light')
+  }
+  for (let i = 3; i < 6; i++) {
+    await delay(180)
+    flipCard(cards[i], sixNumbers[i])
     haptic('light')
   }
 }
 
-// --- 6개 한번에 보기 ---
-async function showExtraNumbers() {
-  const rewarded = await showRewardedAd()
-  if (!rewarded) return
-
-  const extra3 = currentNumbers.slice(3)
-  const extraBalls = document.getElementById('extra-balls')
-  extraBalls.innerHTML = extra3
-    .map(n => `<span class="lotto-ball ${getBallClass(n)}">${n}</span>`)
-    .join('')
-
-  document.getElementById('unlock-full').classList.add('hidden')
-  document.getElementById('extra-numbers').classList.remove('hidden')
-  haptic('heavy')
+function flipCard(card, num) {
+  const ball = card.querySelector('.result-ball')
+  ball.className = `result-ball ${getBallClass(num)}`
+  ball.textContent = num
+  card.classList.add('flipped')
 }
 
 // --- 보관함 저장 (결과 화면) ---
@@ -265,24 +259,36 @@ function saveCurrentToVault() {
     currentSaved = true
     const btn = document.getElementById('btn-save-vault')
     btn.classList.add('saved')
-    document.querySelector('#btn-save-vault .btn-save-label').textContent = '✓ 보관됨'
+    document.querySelector('#btn-save-vault .btn-save-label').textContent = '✓ 보관함에 저장됨'
+    document.getElementById('btn-save-sublabel').textContent = '추첨 후 자동으로 당첨 확인'
     showToast('🔖 보관함에 저장되었어요')
     updateVaultBadge()
-    haptic('light')
+    haptic('heavy')
+
+    // 다시뽑기/처음으로 버튼 노출
+    document.getElementById('result-actions').classList.remove('hidden')
+    // 저장 버튼 쪽으로 스크롤 (CTA 연속성)
+    setTimeout(() => {
+      document.getElementById('result-actions').scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 200)
   }
 }
 
-// --- 5게임 보기 ---
+// --- 5게임 보기 (A는 이미 받음 → B~E 4게임 추가) ---
 async function showFiveGames() {
   const rewarded = await showRewardedAd()
   if (!rewarded) return
 
-  const games = generateFiveGames(selectedConditions, lottoData)
+  // A게임 = 현재 6개 번호, B~E 4게임 추가 생성
+  const allFive = generateFiveGames(selectedConditions, lottoData)
+  // 첫 번째(A)를 currentNumbers로 대체
+  const games = [currentNumbers, ...allFive.slice(1, 5)]
+
   const list = document.getElementById('five-game-list')
   const letters = ['A', 'B', 'C', 'D', 'E']
 
   list.innerHTML = games.map((nums, i) => `
-    <div class="five-game-row">
+    <div class="five-game-row${i === 0 ? ' game-a' : ''}">
       <span class="five-game-letter">${letters[i]}</span>
       <div class="five-game-balls">
         ${nums.map(n => createBallHTML(n, 's')).join('')}
@@ -294,16 +300,16 @@ async function showFiveGames() {
   document.getElementById('five-game-result').classList.remove('hidden')
   haptic('heavy')
 
-  // 5게임 모두 보관함에 저장할지 물어보는 대신 간단히 토스트
-  games.forEach((nums, i) => {
+  // B~E 4게임을 보관함 자동 저장 (A는 유저가 명시 저장하거나 보관함 버튼 누를 때 저장)
+  for (let i = 1; i < 5; i++) {
     saveNumbers({
-      numbers: nums,
+      numbers: games[i],
       conditions: ['5game'],
       targetDrawNo: currentTargetDrawNo,
       label: `제${currentTargetDrawNo}회 실전 ${letters[i]}게임`,
     })
-  })
-  showToast('🎫 5게임이 보관함에 자동 저장되었어요')
+  }
+  showToast('🎫 B~E 4게임이 보관함에 저장되었어요')
   updateVaultBadge()
 }
 
@@ -552,10 +558,6 @@ document.getElementById('btn-home').addEventListener('click', () => {
 document.getElementById('btn-back-stats').addEventListener('click', () => {
   switchScreen('stats')
   haptic('light')
-})
-
-document.getElementById('btn-unlock-full').addEventListener('click', () => {
-  showExtraNumbers()
 })
 
 // 보관함

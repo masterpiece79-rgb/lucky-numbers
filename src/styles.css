@@ -563,6 +563,20 @@ body {
   perspective: 800px;
 }
 
+.result-cards-6 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 24px 0 28px;
+  padding: 0 8px;
+}
+
+.result-cards-6 .result-card {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  height: auto;
+}
+
 .result-card {
   width: 96px;
   height: 128px;
@@ -610,10 +624,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 900;
   color: #fff;
   text-shadow: 0 2px 4px rgba(0,0,0,0.25);
@@ -751,6 +765,11 @@ body {
   flex-direction: column;
   align-items: center;
   margin-top: auto;
+  animation: modalPop 0.4s ease;
+}
+
+.result-actions.hidden {
+  display: none;
 }
 
 /* ============================
@@ -1136,6 +1155,37 @@ body {
   transition: transform 0.1s;
 }
 
+.btn-save-vault.primary {
+  padding: 18px 14px;
+  background: linear-gradient(135deg, var(--gold), #FFA500);
+  border: none;
+  margin-bottom: 12px;
+}
+
+.btn-save-vault.primary .btn-save-label {
+  color: #1a1a1a;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.btn-save-vault.primary .btn-save-sublabel {
+  color: rgba(26, 26, 26, 0.65);
+  font-weight: 600;
+}
+
+.btn-save-vault.primary.saved {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+}
+
+.btn-save-vault.primary.saved .btn-save-label {
+  color: var(--text-dim);
+}
+
+.btn-save-vault.primary.saved .btn-save-sublabel {
+  color: var(--text-dim);
+}
+
 .btn-save-vault:active {
   transform: scale(0.98);
 }
@@ -1278,6 +1328,11 @@ body {
   border-bottom: none;
 }
 
+.five-game-row.game-a .five-game-letter {
+  background: linear-gradient(135deg, var(--gold), #FFA500);
+  color: #1a1a1a;
+}
+
 .five-game-letter {
   width: 22px;
   height: 22px;
@@ -1299,6 +1354,33 @@ body {
 }
 
 /* ============================
+   조건 화면 - "또는 다른 방법" 구분선
+   ============================ */
+.method-divider {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0 14px;
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.method-divider::before,
+.method-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.method-divider span {
+  white-space: nowrap;
+}
+
+/* ============================
    조건 화면 - 키워드 바로가기
    ============================ */
 .keyword-shortcut {
@@ -1306,20 +1388,21 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 16px;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.18), rgba(255, 215, 0, 0.08));
-  border: 1.5px solid rgba(124, 58, 237, 0.35);
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(26, 15, 60, 0.4));
+  border: 1.5px dashed rgba(124, 58, 237, 0.5);
   border-radius: 14px;
   cursor: pointer;
   margin-bottom: 12px;
   text-align: left;
   color: var(--text);
   font-family: inherit;
-  transition: transform 0.1s;
+  transition: transform 0.1s, border-color 0.2s;
 }
 
 .keyword-shortcut:active {
   transform: scale(0.98);
+  border-color: rgba(124, 58, 237, 0.8);
 }
 
 .keyword-shortcut-emoji {
