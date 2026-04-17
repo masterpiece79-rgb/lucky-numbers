@@ -349,7 +349,7 @@ body {
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 14px 12px;
+  padding: 14px 8px 12px;
 }
 
 .stat-header {
@@ -371,8 +371,9 @@ body {
 
 .stat-balls {
   display: flex;
-  flex-wrap: wrap;
-  gap: 22px 5px;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  gap: 2px;
   padding-bottom: 14px;
 }
 
@@ -406,8 +407,8 @@ body {
   transform: rotate(-20deg);
 }
 
-.lotto-ball.s { width: 30px; height: 30px; font-size: 12px; }
-.lotto-ball.s::after { top: 4px; left: 7px; width: 8px; height: 4px; }
+.lotto-ball.s { width: 28px; height: 28px; font-size: 11px; }
+.lotto-ball.s::after { top: 4px; left: 7px; width: 7px; height: 4px; }
 
 .ball-1  { background: var(--ball-1); }
 .ball-2  { background: var(--ball-2); }
@@ -872,49 +873,78 @@ body {
 }
 
 /* ============================
-   보관함 진입 버튼 (통계 화면 상단)
+   보관함 진입 카드 (통계 화면 상단 히어로)
    ============================ */
-.vault-entry-btn {
+.vault-entry-card {
   width: 100%;
+  min-height: 180px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 14px;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.18), rgba(255, 215, 0, 0.1));
-  border: 1px solid rgba(124, 58, 237, 0.3);
-  border-radius: 12px;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 18px 20px;
+  background:
+    radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.18) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(124, 58, 237, 0.28), rgba(26, 15, 60, 0.6));
+  border: 1px solid rgba(124, 58, 237, 0.4);
+  border-radius: 18px;
   color: var(--text);
-  font-size: 13px;
-  font-weight: 700;
-  font-family: inherit;
   cursor: pointer;
-  margin-bottom: 20px;
+  font-family: inherit;
+  text-align: left;
+  margin-bottom: 22px;
   position: relative;
+  overflow: hidden;
   transition: transform 0.1s;
 }
 
-.vault-entry-btn:active {
-  transform: scale(0.98);
+.vault-entry-card:active {
+  transform: scale(0.99);
 }
 
-.vault-entry-icon {
-  font-size: 16px;
+.vault-entry-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.vault-entry-card-icon {
+  font-size: 44px;
+  line-height: 1;
+  filter: drop-shadow(0 4px 8px rgba(124, 58, 237, 0.3));
+}
+
+.vault-entry-card-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vault-entry-card-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+
+.vault-entry-card-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
 }
 
 .vault-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
   background: #FF3B30;
   color: #fff;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
-  border-radius: 10px;
-  margin-left: 4px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.4);
 }
 
 .vault-badge.hidden {

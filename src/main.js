@@ -465,14 +465,19 @@ function updateVaultBadge() {
   const items = getAllSaved()
   const winCount = items.filter(i => i.result && i.result.rank > 0).length
   const badge = document.getElementById('vault-badge')
+  const desc = document.getElementById('vault-entry-card-desc')
+
   if (winCount > 0) {
     badge.textContent = `${winCount}`
     badge.classList.remove('hidden')
+    if (desc) desc.textContent = `🎉 당첨 ${winCount}건 · 총 ${items.length}건 보관 중`
   } else if (items.length > 0) {
     badge.textContent = `${items.length}`
     badge.classList.remove('hidden')
+    if (desc) desc.textContent = `총 ${items.length}건 · 추첨 후 자동 당첨 확인`
   } else {
     badge.classList.add('hidden')
+    if (desc) desc.textContent = '뽑은 번호를 저장하고 추첨 후 당첨 확인'
   }
 }
 

@@ -24,17 +24,17 @@
             </div>
           </div>
           <div class="feature-item">
-            <span class="feature-icon">🎯</span>
+            <span class="feature-icon">🗂️</span>
             <div class="feature-text">
-              <strong>6가지 행운 조건</strong>
-              <span>뜨거운 번호, 숨은 번호 등 나만의 전략</span>
+              <strong>행운조건 번호와 보관함</strong>
+              <span>뜨거운 번호, 직전 번호 등 나만의 전략</span>
             </div>
           </div>
           <div class="feature-item">
-            <span class="feature-icon">🃏</span>
+            <span class="feature-icon">🌙</span>
             <div class="feature-text">
-              <strong>행운의 번호 3개 추천</strong>
-              <span>조건 조합으로 매번 새로운 번호 생성</span>
+              <strong>꿈 키워드 행운번호</strong>
+              <span>돼지꿈? 조상꿈? 키워드로 뽑아보는 행운번호</span>
             </div>
           </div>
         </div>
@@ -54,12 +54,18 @@
     <!-- 화면 2: 통계 대시보드 -->
     <div id="screen-stats" class="screen">
       <div class="screen-content screen-content--stats">
-        <button class="vault-entry-btn" id="btn-vault">
-          <span class="vault-entry-icon">🗂️</span>
-          <span class="vault-entry-label">나의 번호 보관함</span>
-          <span class="vault-badge hidden" id="vault-badge">0</span>
+        <button class="vault-entry-card" id="btn-vault">
+          <div class="vault-entry-card-top">
+            <span class="vault-entry-card-icon">🗂️</span>
+            <span class="vault-badge hidden" id="vault-badge">0</span>
+          </div>
+          <div class="vault-entry-card-bottom">
+            <span class="vault-entry-card-title">나의 번호 보관함</span>
+            <span class="vault-entry-card-desc" id="vault-entry-card-desc">뽑은 번호를 저장하고 추첨 후 당첨 확인</span>
+          </div>
         </button>
-        <h2 class="section-title">📊 역대 당첨 통계</h2>
+
+        <h2 class="section-title">📊 당첨 통계</h2>
         <p class="section-desc">1회~<span id="total-rounds">0</span>회 총 <span id="total-count">0</span>회차 분석</p>
 
         <!-- 직전 당첨 결과 -->
