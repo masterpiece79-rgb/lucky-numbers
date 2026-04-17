@@ -54,6 +54,11 @@
     <!-- 화면 2: 통계 대시보드 -->
     <div id="screen-stats" class="screen">
       <div class="screen-content screen-content--stats">
+        <button class="vault-entry-btn" id="btn-vault">
+          <span class="vault-entry-icon">🗂️</span>
+          <span class="vault-entry-label">나의 번호 보관함</span>
+          <span class="vault-badge hidden" id="vault-badge">0</span>
+        </button>
         <h2 class="section-title">📊 역대 당첨 통계</h2>
         <p class="section-desc">1회~<span id="total-rounds">0</span>회 총 <span id="total-count">0</span>회차 분석</p>
 
@@ -118,6 +123,15 @@
       <div class="screen-content">
         <h2 class="section-title">🎯 나만의 행운 조건</h2>
         <p class="section-desc">1~2개를 골라보세요</p>
+
+        <button class="keyword-shortcut" id="btn-go-keyword">
+          <span class="keyword-shortcut-emoji">🌙</span>
+          <div class="keyword-shortcut-info">
+            <span class="keyword-shortcut-title">꿈/키워드로 뽑기</span>
+            <span class="keyword-shortcut-desc">돼지, 조상, 용... 키워드 한 단어로</span>
+          </div>
+          <span class="keyword-shortcut-arrow">→</span>
+        </button>
 
         <div class="conditions-list" id="conditions-list">
           <button class="condition-card" data-condition="hot">
@@ -230,6 +244,31 @@
           <div class="extra-numbers-balls" id="extra-balls"></div>
         </div>
 
+        <!-- 보관함 저장 버튼 -->
+        <button class="btn-save-vault" id="btn-save-vault">
+          <span class="btn-save-icon">🔖</span>
+          <span class="btn-save-label">이 번호 보관함에 저장</span>
+          <span class="btn-save-sublabel" id="btn-save-sublabel">제1220회 결과 자동 확인</span>
+        </button>
+
+        <!-- 5게임 한번에 뽑기 (리워드 광고) -->
+        <div class="five-game-card" id="five-game-card">
+          <div class="five-game-header">
+            <span class="five-game-badge">NEW</span>
+            <span class="five-game-title">실전 5게임 한번에 받기</span>
+          </div>
+          <p class="five-game-desc">실제 로또 용지처럼 A~E 5세트를 한번에<br>복권방 가서 그대로 구매하세요</p>
+          <button class="five-game-btn" id="btn-five-game">
+            <span>▶</span> 광고 시청하고 5게임 받기
+          </button>
+        </div>
+
+        <!-- 5게임 결과 (광고 후 노출) -->
+        <div class="five-game-result hidden" id="five-game-result">
+          <div class="five-game-result-header">🎫 실전 5게임</div>
+          <div id="five-game-list"></div>
+        </div>
+
         <p class="result-disclaimer">이 번호는 과거 통계 기반 재미 추천이며,<br>당첨을 보장하지 않습니다.</p>
 
         <div class="result-actions">
@@ -238,6 +277,65 @@
         </div>
       </div>
     </div>
+
+    <!-- 화면 5: 보관함 -->
+    <div id="screen-vault" class="screen">
+      <div class="screen-content">
+        <div class="vault-header">
+          <button class="icon-btn" id="btn-vault-back" aria-label="뒤로">←</button>
+          <h2 class="section-title vault-title">🗂️ 나의 보관함</h2>
+        </div>
+        <p class="section-desc" id="vault-desc">저장한 번호 · 추첨 후 자동 당첨 확인</p>
+
+        <div class="vault-empty hidden" id="vault-empty">
+          <div class="vault-empty-emoji">🗂️</div>
+          <p class="vault-empty-title">아직 보관한 번호가 없어요</p>
+          <p class="vault-empty-desc">번호를 뽑고 "보관함에 저장"을 눌러보세요.<br>추첨 후 당첨 여부를 자동으로 알려드려요.</p>
+        </div>
+
+        <div class="vault-list" id="vault-list"></div>
+      </div>
+    </div>
+
+    <!-- 화면 6: 키워드 번호 -->
+    <div id="screen-keyword" class="screen">
+      <div class="screen-content">
+        <div class="vault-header">
+          <button class="icon-btn" id="btn-keyword-back" aria-label="뒤로">←</button>
+          <h2 class="section-title vault-title">🌙 꿈/키워드 번호</h2>
+        </div>
+        <p class="section-desc">꿈에 본 것, 떠오르는 단어 하나를 입력하세요</p>
+
+        <input type="text" class="keyword-input" id="keyword-input" placeholder="예: 돼지, 조상, 용, 돈 ..." maxlength="20">
+
+        <div class="keyword-suggestions-label">추천 키워드</div>
+        <div class="keyword-suggestions" id="keyword-suggestions"></div>
+
+        <button class="btn-primary" id="btn-keyword-generate" disabled>
+          🌙 광고 시청하고 번호 받기
+        </button>
+
+        <!-- 키워드 결과 -->
+        <div class="keyword-result hidden" id="keyword-result">
+          <div class="keyword-result-header">
+            <span class="keyword-result-emoji" id="keyword-result-emoji">🌟</span>
+            <div class="keyword-result-meta">
+              <span class="keyword-result-title" id="keyword-result-title">"돼지"의 행운 번호</span>
+              <span class="keyword-result-desc" id="keyword-result-desc"></span>
+            </div>
+          </div>
+          <div class="keyword-result-balls" id="keyword-result-balls"></div>
+          <button class="btn-save-vault small" id="btn-keyword-save">
+            <span class="btn-save-icon">🔖</span>
+            <span class="btn-save-label">보관함에 저장</span>
+          </button>
+          <button class="btn-secondary" id="btn-keyword-retry">다른 키워드로 뽑기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast hidden" id="toast"></div>
 
     <!-- 전면 광고 오버레이 -->
     <div id="ad-overlay" class="overlay hidden">

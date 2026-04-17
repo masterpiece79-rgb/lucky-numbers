@@ -870,3 +870,620 @@ body {
 .ball-animate {
   animation: ballPop 0.4s ease forwards;
 }
+
+/* ============================
+   보관함 진입 버튼 (통계 화면 상단)
+   ============================ */
+.vault-entry-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.18), rgba(255, 215, 0, 0.1));
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  margin-bottom: 20px;
+  position: relative;
+  transition: transform 0.1s;
+}
+
+.vault-entry-btn:active {
+  transform: scale(0.98);
+}
+
+.vault-entry-icon {
+  font-size: 16px;
+}
+
+.vault-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: #FF3B30;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  border-radius: 10px;
+  margin-left: 4px;
+}
+
+.vault-badge.hidden {
+  display: none;
+}
+
+/* ============================
+   공통 화면 헤더 (← 뒤로)
+   ============================ */
+.vault-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  padding-top: 8px;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 20px;
+  cursor: pointer;
+  border-radius: 50%;
+  font-family: inherit;
+}
+
+.icon-btn:active {
+  background: var(--bg-surface);
+}
+
+.vault-title {
+  flex: 1;
+  text-align: left;
+  margin: 0;
+}
+
+/* ============================
+   보관함 아이템 리스트
+   ============================ */
+.vault-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.vault-item {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vault-item.win {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(124, 58, 237, 0.08));
+  border-color: var(--border-active);
+}
+
+.vault-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vault-item-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.vault-item-date {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.vault-item-balls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.vault-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.vault-item-meta .tag {
+  padding: 3px 8px;
+  background: var(--bg-surface-hover);
+  border-radius: 10px;
+}
+
+.vault-item-result {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  font-size: 12px;
+  color: var(--gold-soft);
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vault-item-result.lose {
+  background: var(--bg-surface);
+  border-color: var(--border);
+  color: var(--text-dim);
+}
+
+.vault-item-result.pending {
+  background: var(--purple-dim);
+  border-color: rgba(124, 58, 237, 0.25);
+  color: #C4B5FD;
+}
+
+.vault-item-delete {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+  font-family: inherit;
+}
+
+.vault-empty {
+  width: 100%;
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.vault-empty.hidden {
+  display: none;
+}
+
+.vault-empty-emoji {
+  font-size: 48px;
+  margin-bottom: 14px;
+  opacity: 0.6;
+}
+
+.vault-empty-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.vault-empty-desc {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+/* ============================
+   보관함 저장 버튼
+   ============================ */
+.btn-save-vault {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 14px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(124, 58, 237, 0.08));
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 14px;
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  margin-bottom: 14px;
+  transition: transform 0.1s;
+}
+
+.btn-save-vault:active {
+  transform: scale(0.98);
+}
+
+.btn-save-vault.saved {
+  background: var(--bg-surface);
+  border-color: var(--border);
+  opacity: 0.7;
+}
+
+.btn-save-vault.small {
+  margin-top: 12px;
+  margin-bottom: 6px;
+}
+
+.btn-save-icon {
+  display: none;
+}
+
+.btn-save-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gold-soft);
+}
+
+.btn-save-vault.saved .btn-save-label {
+  color: var(--text-dim);
+}
+
+.btn-save-sublabel {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* ============================
+   5게임 카드
+   ============================ */
+.five-game-card {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(255, 215, 0, 0.05));
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.five-game-card.hidden {
+  display: none;
+}
+
+.five-game-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.five-game-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 7px;
+  background: var(--gold);
+  color: #1a1a1a;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+}
+
+.five-game-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.five-game-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.five-game-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--purple), #5B21B6);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 4px;
+  transition: transform 0.1s;
+}
+
+.five-game-btn:active {
+  transform: scale(0.98);
+}
+
+/* 5게임 결과 리스트 */
+.five-game-result {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 20px;
+  animation: modalPop 0.4s ease;
+}
+
+.five-game-result.hidden {
+  display: none;
+}
+
+.five-game-result-header {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--gold-soft);
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.five-game-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--border);
+}
+
+.five-game-row:last-child {
+  border-bottom: none;
+}
+
+.five-game-letter {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gold-dim);
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 800;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.five-game-balls {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+/* ============================
+   조건 화면 - 키워드 바로가기
+   ============================ */
+.keyword-shortcut {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.18), rgba(255, 215, 0, 0.08));
+  border: 1.5px solid rgba(124, 58, 237, 0.35);
+  border-radius: 14px;
+  cursor: pointer;
+  margin-bottom: 12px;
+  text-align: left;
+  color: var(--text);
+  font-family: inherit;
+  transition: transform 0.1s;
+}
+
+.keyword-shortcut:active {
+  transform: scale(0.98);
+}
+
+.keyword-shortcut-emoji {
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(124, 58, 237, 0.18);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.keyword-shortcut-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.keyword-shortcut-title {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.keyword-shortcut-desc {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+}
+
+.keyword-shortcut-arrow {
+  font-size: 16px;
+  color: var(--purple);
+  font-weight: 700;
+}
+
+/* ============================
+   키워드 화면
+   ============================ */
+.keyword-input {
+  width: 100%;
+  padding: 16px 18px;
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 600;
+  font-family: inherit;
+  margin-top: 8px;
+  margin-bottom: 20px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.keyword-input:focus {
+  border-color: var(--border-active);
+}
+
+.keyword-input::placeholder {
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.keyword-suggestions-label {
+  width: 100%;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.keyword-suggestions {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.keyword-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 0.1s, border-color 0.2s;
+}
+
+.keyword-chip:active {
+  transform: scale(0.95);
+}
+
+.keyword-chip.selected {
+  border-color: var(--border-active);
+  background: var(--gold-dim);
+}
+
+.keyword-result {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(124, 58, 237, 0.08));
+  border: 1px solid var(--border-active);
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 20px;
+  animation: modalPop 0.4s ease;
+}
+
+.keyword-result.hidden {
+  display: none;
+}
+
+.keyword-result-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.keyword-result-emoji {
+  font-size: 40px;
+}
+
+.keyword-result-meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.keyword-result-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--gold-soft);
+}
+
+.keyword-result-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.keyword-result-balls {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.keyword-result-balls .lotto-ball {
+  width: 44px;
+  height: 44px;
+  font-size: 16px;
+}
+
+/* ============================
+   토스트
+   ============================ */
+.toast {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 20px;
+  background: rgba(26, 26, 26, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 30px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 200;
+  animation: toastSlide 0.3s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  max-width: 90%;
+  text-align: center;
+}
+
+.toast.hidden {
+  display: none;
+}
+
+@keyframes toastSlide {
+  0% { transform: translate(-50%, 20px); opacity: 0; }
+  100% { transform: translate(-50%, 0); opacity: 1; }
+}

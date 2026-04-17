@@ -119,3 +119,24 @@ export function generateLuckyNumbers(conditions, data) {
 
   return weightedRandomPick(pool, 3).sort((a, b) => a - b)
 }
+
+// 실전 5게임 생성 (A~E 각 6개 번호)
+export function generateFiveGames(conditions, data) {
+  const games = []
+  for (let i = 0; i < 5; i++) {
+    const set1 = generateLuckyNumbers(conditions, data)
+    const set2 = generateLuckyNumbers(conditions, data)
+    const merged = [...set1]
+    for (const n of set2) {
+      if (!merged.includes(n) && merged.length < 6) {
+        merged.push(n)
+      }
+    }
+    while (merged.length < 6) {
+      const rand = Math.floor(Math.random() * 45) + 1
+      if (!merged.includes(rand)) merged.push(rand)
+    }
+    games.push(merged.sort((a, b) => a - b))
+  }
+  return games
+}
