@@ -9,7 +9,7 @@ var global = typeof globalThis !== 'undefined' ? globalThis : typeof global !== 
     host: ''
   };
   global.__appsInToss = {
-    deploymentId: "019d9ce1-d575-7d94-9d31-f35952eac2dc",
+    deploymentId: "019d9cf1-3d62-7eea-9430-cc4b80b4c868",
     brandDisplayName: "\uD589\uC6B4\uC758 \uBC88\uD638",
     brandPrimaryColor: "#FFD700",
     brandIcon: "https://lucky-numbers-miniapp.vercel.app/icon.png",
@@ -132,7 +132,7 @@ if (global.__MICRO_FRONTEND__ == null) {
     host: ''
   };
   global.__appsInToss = {
-    deploymentId: "019d9ce1-d575-7d94-9d31-f35952eac2dc",
+    deploymentId: "019d9cf1-3d62-7eea-9430-cc4b80b4c868",
     brandDisplayName: "\uD589\uC6B4\uC758 \uBC88\uD638",
     brandPrimaryColor: "#FFD700",
     brandIcon: "https://lucky-numbers-miniapp.vercel.app/icon.png",

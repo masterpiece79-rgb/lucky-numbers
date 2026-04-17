@@ -582,6 +582,7 @@ body {
   gap: 10px;
   margin: 24px 0 28px;
   padding: 0 8px;
+  width: 100%;
 }
 
 .result-cards-6 .result-card {

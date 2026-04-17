@@ -102,10 +102,10 @@ function renderStats() {
 const conditionLabels = {
   'hot': '🔥 뜨거운 번호',
   'cold': '❄️ 차가운 번호',
-  'last-draw': '🔄 직전 회차',
   'monthly': '📅 이달의 행운',
   'balanced': '🎯 빈도 균형',
   'hidden': '🌙 숨은 번호',
+  'last-draw': '🔄 직전 회차', // legacy - 기존 저장된 데이터 호환용
 }
 
 function setupConditions() {
@@ -213,7 +213,7 @@ async function showResult() {
   const saveBtn = document.getElementById('btn-save-vault')
   saveBtn.classList.remove('saved')
   document.querySelector('#btn-save-vault .btn-save-label').textContent = '이 번호 보관함에 저장'
-  document.getElementById('btn-save-sublabel').textContent = `추첨 후 앱 열면 제${currentTargetDrawNo}회 자동 확인`
+  document.getElementById('btn-save-sublabel').textContent = `제${currentTargetDrawNo}회 추첨(토 20:35) 이후 앱을 다시 열면 결과 확인`
 
   // 5게임 섹션 리셋
   document.getElementById('five-game-card').classList.remove('hidden')
@@ -260,7 +260,7 @@ function saveCurrentToVault() {
     const btn = document.getElementById('btn-save-vault')
     btn.classList.add('saved')
     document.querySelector('#btn-save-vault .btn-save-label').textContent = '✓ 보관함에 저장됨'
-    document.getElementById('btn-save-sublabel').textContent = '추첨 후 자동으로 당첨 확인'
+    document.getElementById('btn-save-sublabel').textContent = '토요일 추첨(20:35) 후 앱을 다시 열면 결과 알려드려요'
     showToast('🔖 보관함에 저장되었어요')
     updateVaultBadge()
     haptic('heavy')
@@ -410,7 +410,7 @@ function renderVault() {
   document.getElementById('vault-desc').textContent =
     winCount > 0
       ? `🎉 당첨 ${winCount}건 · 총 ${items.length}건 보관 중`
-      : `총 ${items.length}건 · 추첨 후 자동 당첨 확인`
+      : `총 ${items.length}건 · 토요일 추첨 후 앱 열면 결과 확인`
 
   listEl.innerHTML = items.map(item => {
     const isWin = item.result && item.result.rank > 0
@@ -495,10 +495,10 @@ function updateVaultBadge() {
   } else if (items.length > 0) {
     badge.textContent = `${items.length}`
     badge.classList.remove('hidden')
-    if (desc) desc.textContent = `총 ${items.length}건 · 추첨 후 자동 당첨 확인`
+    if (desc) desc.textContent = `총 ${items.length}건 · 토요일 추첨 후 앱 열면 결과 확인`
   } else {
     badge.classList.add('hidden')
-    if (desc) desc.textContent = '뽑은 번호를 저장하고 추첨 후 당첨 확인'
+    if (desc) desc.textContent = '번호 저장 후 토요일 추첨 후 앱에 다시 오면 결과 확인'
   }
 }
 
@@ -529,7 +529,7 @@ async function init() {
     console.log('[Vault] 체크됨:', totalChecked, '당첨:', newWinnings.length)
     if (newWinnings.length > 0) {
       setTimeout(() => {
-        showToast(`🎉 보관함에 당첨 ${newWinnings.length}건이 확인되었어요!`, 4000)
+        showToast(`🎉 보관함에 당첨 ${newWinnings.length}건이 있어요! 확인해보세요`, 4000)
       }, 1200)
     }
     updateVaultBadge()
