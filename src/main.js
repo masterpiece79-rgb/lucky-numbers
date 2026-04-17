@@ -11,7 +11,7 @@ import {
 import { generateLuckyNumbers, generateFiveGames } from './generator.js'
 import { showTossInterstitialAd, showTossRewardedAd } from './toss-sdk.js'
 import { getAllSaved, saveNumbers, deleteItem, updateItem } from './storage.js'
-import { checkAllPending, getPrizeLabel, getRankEmoji } from './matcher.js'
+import { checkAllPending, getPrizeLabel, getRankEmoji, getRankLabel, formatPrize, formatWinners } from './matcher.js'
 import { generateFromKeyword, getSuggestedKeywords } from './keyword-numbers.js'
 
 // --- State ---
@@ -213,7 +213,7 @@ async function showResult() {
   const saveBtn = document.getElementById('btn-save-vault')
   saveBtn.classList.remove('saved')
   document.querySelector('#btn-save-vault .btn-save-label').textContent = '이 번호 보관함에 저장'
-  document.getElementById('btn-save-sublabel').textContent = `제${currentTargetDrawNo}회 결과 자동 확인`
+  document.getElementById('btn-save-sublabel').textContent = `추첨 후 앱 열면 제${currentTargetDrawNo}회 자동 확인`
 
   // 5게임 섹션 리셋
   document.getElementById('five-game-card').classList.remove('hidden')
@@ -432,7 +432,22 @@ function renderVault() {
     if (isPending) {
       resultHTML = `<div class="vault-item-result pending">⏳ 제${item.targetDrawNo}회 추첨 대기 중</div>`
     } else if (isWin) {
-      resultHTML = `<div class="vault-item-result">${getRankEmoji(item.result.rank)} ${getPrizeLabel(item.result.rank)} · ${item.result.matches}개 일치${item.result.bonus ? '+보너스' : ''}</div>`
+      const rankLabel = getRankLabel(item.result.rank)
+      const matchText = `${item.result.matches}개 일치${item.result.bonus ? '+보너스' : ''}`
+      let prizeText = ''
+      if (item.prizeInfo && item.prizeInfo.prize) {
+        prizeText = ` · <strong>${formatPrize(item.prizeInfo.prize)}</strong>`
+      }
+      let winnersText = ''
+      if (item.prizeInfo && item.prizeInfo.winners) {
+        winnersText = `<div class="vault-item-subresult">전국 ${formatWinners(item.prizeInfo.winners)} · 제${item.targetDrawNo}회</div>`
+      }
+      resultHTML = `
+        <div class="vault-item-result win-row">
+          <span>${rankLabel} · ${matchText}${prizeText}</span>
+        </div>
+        ${winnersText}
+      `
     } else {
       resultHTML = `<div class="vault-item-result lose">제${item.targetDrawNo}회 · ${item.result.matches}개 일치 (낙첨)</div>`
     }

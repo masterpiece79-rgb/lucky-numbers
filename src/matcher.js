@@ -71,9 +71,18 @@ export function checkAllPending(allData) {
     if (!draw) continue // 아직 추첨 안 됨
 
     const result = matchOneSet(item.numbers, draw.numbers, draw.bonus_no)
+
+    // 실제 당첨금/당첨자 수 (API divisions 배열 - 등수-1 인덱스)
+    let prizeInfo = null
+    if (result.rank > 0 && Array.isArray(draw.divisions) && draw.divisions[result.rank - 1]) {
+      const div = draw.divisions[result.rank - 1]
+      prizeInfo = { prize: div.prize, winners: div.winners }
+    }
+
     updateItem(item.id, {
       checked: true,
       result,
+      prizeInfo,
       drawDate: draw.date,
       drawNumbers: draw.numbers,
       drawBonus: draw.bonus_no,
@@ -81,7 +90,7 @@ export function checkAllPending(allData) {
 
     totalChecked++
     if (result.rank > 0) {
-      newWinnings.push({ ...item, result, drawNumbers: draw.numbers, drawBonus: draw.bonus_no })
+      newWinnings.push({ ...item, result, prizeInfo, drawNumbers: draw.numbers, drawBonus: draw.bonus_no })
     }
   }
 
@@ -89,7 +98,45 @@ export function checkAllPending(allData) {
 }
 
 /**
- * 등수별 상금 (2024년 기준 평균치, 참고용)
+ * 당첨금 포맷팅 (원 단위 → 억/만원 단위 한글 표기)
+ */
+export function formatPrize(amount) {
+  if (!amount || amount <= 0) return ''
+  if (amount >= 100000000) {
+    const eok = (amount / 100000000)
+    return eok >= 10 ? `${Math.round(eok)}억원` : `${eok.toFixed(1).replace(/\.0$/, '')}억원`
+  }
+  if (amount >= 10000) {
+    const man = Math.round(amount / 10000)
+    return `${man.toLocaleString()}만원`
+  }
+  return `${amount.toLocaleString()}원`
+}
+
+/**
+ * 당첨자 수 포맷팅
+ */
+export function formatWinners(count) {
+  if (!count) return ''
+  return `${count.toLocaleString()}명 당첨`
+}
+
+/**
+ * 등수 라벨 (아이콘 + 등수 텍스트)
+ */
+export function getRankLabel(rank) {
+  switch (rank) {
+    case 1: return '🏆 1등'
+    case 2: return '🥈 2등'
+    case 3: return '🥉 3등'
+    case 4: return '🎉 4등'
+    case 5: return '✨ 5등'
+    default: return '낙첨'
+  }
+}
+
+/**
+ * 등수별 평균 상금 (fallback: prizeInfo 없을 때)
  */
 export function getPrizeLabel(rank) {
   switch (rank) {
