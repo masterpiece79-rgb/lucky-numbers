@@ -71,8 +71,9 @@ export async function shareApp(sdk) {
 }
 
 // --- 광고 SDK ---
-const AD_GROUP_ID_INTERSTITIAL = 'ait-ad-test-interstitial-id'
-const AD_GROUP_ID_REWARDED = 'ait-ad-test-rewarded-id'
+// 실제 토스 광고 그룹 ID (2026-04-17 발급)
+const AD_GROUP_ID_INTERSTITIAL = 'ait.v2.live.4a2b351327de4a79' // 번호생성 전면 광고
+const AD_GROUP_ID_REWARDED = 'ait.v2.live.3a7e1415be6c402e'     // 6개번호 보상형 광고
 
 /**
  * 토스 전면 광고 표시 (interstitial)

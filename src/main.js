@@ -16,6 +16,7 @@ let lottoData = null
 let isInToss = typeof window !== 'undefined' && !!window.__APPS_IN_TOSS__
 let selectedConditions = []
 let currentNumbers = [] // 현재 생성된 전체 6개 번호
+let generateCount = 0   // 번호 생성 횟수 (첫 번째는 광고 없이)
 
 // --- DOM ---
 const screens = {
@@ -168,8 +169,11 @@ async function showRewardedAd() {
 
 // --- Result Rendering ---
 async function showResult() {
-  // 먼저 전면 광고 표시
-  await showInterstitialAd()
+  // 첫 생성은 광고 없이, 2번째부터 전면 광고 표시
+  generateCount++
+  if (generateCount > 1) {
+    await showInterstitialAd()
+  }
 
   // 번호 6개 생성 (3개 먼저 + 3개 추가)
   const first3 = generateLuckyNumbers(selectedConditions, lottoData)
