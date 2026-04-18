@@ -167,18 +167,15 @@ function showFallbackInterstitialAd() {
 }
 
 async function showInterstitialAd() {
-  if (isInToss) {
-    const shown = await showTossInterstitialAd()
-    if (shown) return
-  }
+  // 항상 토스 SDK를 먼저 시도 → 실패 시 fallback (환경 감지는 SDK가 스스로 처리)
+  const shown = await showTossInterstitialAd()
+  if (shown) return
   return showFallbackInterstitialAd()
 }
 
 async function showRewardedAd() {
-  if (isInToss) {
-    const rewarded = await showTossRewardedAd()
-    if (rewarded) return true
-  }
+  const rewarded = await showTossRewardedAd()
+  if (rewarded) return true
   await showFallbackInterstitialAd()
   return true
 }
