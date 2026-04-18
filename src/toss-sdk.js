@@ -97,6 +97,7 @@ export async function showTossInterstitialAd() {
 
     return new Promise((resolve) => {
       let done = false
+      let loaded = false
       const finish = (value) => {
         if (done) return
         done = true
@@ -104,6 +105,7 @@ export async function showTossInterstitialAd() {
       }
 
       ad.on('loaded', async () => {
+        loaded = true
         console.log('[Ad] 전면 광고 로드 완료')
         try {
           await showFullScreenAd(ad)
@@ -123,8 +125,12 @@ export async function showTossInterstitialAd() {
         finish(false)
       })
 
-      // 15초 타임아웃 (광고 네트워크 응답 없으면 fallback)
-      setTimeout(() => finish(false), 15000)
+      // 5초 안에 loaded 이벤트 없으면 웹 모드로 판단 → fallback
+      setTimeout(() => {
+        if (!loaded) finish(false)
+      }, 5000)
+      // 전체 60초 최대 (loaded 후엔 유저가 광고 볼 시간 여유)
+      setTimeout(() => finish(false), 60000)
     })
   } catch (error) {
     console.error('[Ad] 전면 광고 SDK 호출 실패:', error)
@@ -152,6 +158,7 @@ export async function showTossRewardedAd() {
     return new Promise((resolve) => {
       let rewarded = false
       let done = false
+      let loaded = false
       const finish = (value) => {
         if (done) return
         done = true
@@ -159,6 +166,7 @@ export async function showTossRewardedAd() {
       }
 
       ad.on('loaded', async () => {
+        loaded = true
         console.log('[Ad] 보상형 광고 로드 완료')
         try {
           await showFullScreenAd(ad)

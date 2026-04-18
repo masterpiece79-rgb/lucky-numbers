@@ -166,14 +166,20 @@ function showFallbackInterstitialAd() {
   })
 }
 
+// 광고 로딩 중 인디케이터 (버튼 눌렀을 때 즉각 피드백)
+function showAdLoadingToast() {
+  showToast('광고 불러오는 중...', 5500)
+}
+
 async function showInterstitialAd() {
-  // 항상 토스 SDK를 먼저 시도 → 실패 시 fallback (환경 감지는 SDK가 스스로 처리)
+  showAdLoadingToast()
   const shown = await showTossInterstitialAd()
   if (shown) return
   return showFallbackInterstitialAd()
 }
 
 async function showRewardedAd() {
+  showAdLoadingToast()
   const rewarded = await showTossRewardedAd()
   if (rewarded) return true
   await showFallbackInterstitialAd()
