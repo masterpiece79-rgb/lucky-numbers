@@ -2,13 +2,16 @@ const API_URL = 'https://smok95.github.io/lotto/results/all.json'
 
 let cachedData = null
 
-export async function fetchLottoData() {
-  if (cachedData) return cachedData
+export async function fetchLottoData(forceRefresh = false) {
+  if (cachedData && !forceRefresh) return cachedData
 
-  const res = await fetch(API_URL)
+  // forceRefresh 시 CDN/브라우저 캐시 우회 (추첨 직후 API 반영 지연 대응)
+  const url = forceRefresh ? `${API_URL}?t=${Date.now()}` : API_URL
+  const opts = forceRefresh ? { cache: 'no-store' } : {}
+  const res = await fetch(url, opts)
   if (!res.ok) throw new Error('데이터를 불러올 수 없습니다')
   cachedData = await res.json()
-  console.log(`[LottoData] ${cachedData.length}개 회차 로드 완료`)
+  console.log(`[LottoData] ${cachedData.length}개 회차 로드 완료${forceRefresh ? ' (강제 새로고침)' : ''}`)
   return cachedData
 }
 

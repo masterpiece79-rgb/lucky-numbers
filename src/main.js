@@ -259,6 +259,8 @@ function saveCurrentToVault() {
     label: `제${currentTargetDrawNo}회 행운번호`,
   })
   if (saved) {
+    // 저장 직후 즉시 당첨 체크 (이미 추첨된 회차면 바로 결과 반영)
+    checkAllPending(lottoData)
     currentSaved = true
     const btn = document.getElementById('btn-save-vault')
     btn.classList.add('saved')
@@ -312,6 +314,8 @@ async function showFiveGames() {
       label: `제${currentTargetDrawNo}회 실전 ${letters[i]}게임`,
     })
   }
+  // 저장 직후 즉시 당첨 체크
+  checkAllPending(lottoData)
   showToast('🎫 B~E 4게임이 보관함에 저장되었어요')
   updateVaultBadge()
 }
@@ -385,6 +389,8 @@ function saveKeywordToVault() {
     label: `${currentKeywordResult.emoji} "${currentKeywordResult.matched || currentKeywordResult.keyword}"`,
   })
   if (saved) {
+    // 저장 직후 즉시 당첨 체크
+    checkAllPending(lottoData)
     currentKeywordSaved = true
     const btn = document.getElementById('btn-keyword-save')
     btn.classList.add('saved')
@@ -638,6 +644,8 @@ function savePickerNumbers() {
     isManual: true,
     isPermanent,
   })
+  // 저장 직후 즉시 당첨 체크
+  checkAllPending(lottoData)
 
   showToast('🎯 내 번호가 보관함에 저장되었어요')
   haptic('heavy')
@@ -885,6 +893,8 @@ function closeReceivedDreamModal(saveToVault = false) {
       targetDrawNo: drawNo,
       label: `🎁 ${currentReceivedDream.from}님의 ${currentReceivedDream.emoji} ${currentReceivedDream.keyword}꿈`,
     })
+    // 저장 직후 즉시 당첨 체크
+    checkAllPending(lottoData)
     showToast('🎁 받은 꿈이 보관함에 저장되었어요', 2500)
     updateVaultBadge()
   }
@@ -1012,10 +1022,25 @@ document.getElementById('btn-back-stats').addEventListener('click', () => {
 })
 
 // 보관함
-document.getElementById('btn-vault').addEventListener('click', () => {
-  renderVault()
-  switchScreen('vault')
+document.getElementById('btn-vault').addEventListener('click', async () => {
   haptic('light')
+  switchScreen('vault')
+  renderVault()
+  // 최신 데이터 재fetch + 체크 (추첨 직후 API 반영 지연 대응)
+  try {
+    const fresh = await fetchLottoData(true) // force refresh
+    if (fresh) {
+      lottoData = fresh
+      const { newWinnings } = checkAllPending(lottoData)
+      renderVault()
+      updateVaultBadge()
+      if (newWinnings.length > 0) {
+        showToast(`🎉 새로운 당첨 ${newWinnings.length}건이 확인됐어요!`, 3000)
+      }
+    }
+  } catch (e) {
+    console.log('[Vault] 재fetch 실패 (무시 가능):', e)
+  }
 })
 document.getElementById('btn-vault-back').addEventListener('click', () => {
   switchScreen('stats')
