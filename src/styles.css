@@ -1913,6 +1913,528 @@ body {
 }
 
 /* ============================
+   온보딩 슬라이드
+   ============================ */
+.onboarding-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px 28px;
+  width: 100%;
+  min-height: 100dvh;
+  position: relative;
+}
+
+.ob-slide {
+  width: 100%;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  animation: obFade 0.3s ease;
+}
+
+.ob-slide.active {
+  display: flex;
+}
+
+@keyframes obFade {
+  0% { opacity: 0; transform: translateX(10px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+.ob-hero {
+  width: 100%;
+  aspect-ratio: 1.1 / 1;
+  max-height: 340px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 16px 0 28px;
+  background: linear-gradient(145deg, #FFFBEB 0%, #FEF3C7 100%);
+  border-radius: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.ob-demo {
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+}
+
+/* 슬라이드 1: 3가지 방식 카드 */
+.ob-demo-1 {
+  gap: 10px;
+}
+
+.ob-demo-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.08);
+}
+
+.ob-demo-card span {
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface-hover);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.ob-demo-card strong {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* 슬라이드 2: 보관함 + 달력 */
+.ob-demo-2 {
+  gap: 14px;
+}
+
+.ob-demo-vault {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background:
+    radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.3) 0%, transparent 55%),
+    linear-gradient(135deg, #EDE9FE 0%, #F5F3FF 100%);
+  border: 1px solid #DDD6FE;
+  border-radius: 14px;
+}
+
+.ob-vault-icon {
+  font-size: 32px;
+  filter: drop-shadow(0 4px 8px rgba(124, 58, 237, 0.2));
+}
+
+.ob-vault-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ob-vault-text strong {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.ob-vault-text span {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.ob-vault-arrow {
+  font-size: 16px;
+  color: var(--purple);
+}
+
+.ob-demo-calendar {
+  padding: 12px 16px;
+  background: #fff;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.ob-demo-calendar::before {
+  content: '📅  ';
+}
+
+/* 슬라이드 3: 실제 당첨금 미리보기 */
+.ob-demo-prize {
+  padding: 22px 18px;
+  background: #fff;
+  border: 2px solid #FDE68A;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+  text-align: center;
+}
+
+.ob-prize-rank {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.ob-prize-rank strong {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--gold-text);
+}
+
+.ob-prize-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+/* 타이틀/설명 */
+.ob-title {
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  text-align: center;
+  line-height: 1.3;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.ob-desc {
+  font-size: 14px;
+  text-align: center;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 320px;
+  padding: 0 8px;
+}
+
+.ob-desc-dim {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.ob-disclaimer {
+  margin-top: 18px;
+  padding: 10px 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* Dots */
+.ob-dots {
+  display: flex;
+  gap: 6px;
+  margin: 24px 0 18px;
+  justify-content: center;
+}
+
+.ob-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: all 0.25s;
+}
+
+.ob-dot.active {
+  width: 22px;
+  background: #F59E0B;
+  border-radius: 4px;
+}
+
+/* Controls */
+.ob-controls {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: auto;
+  gap: 8px;
+}
+
+.ob-skip {
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.ob-skip:active {
+  color: var(--text-secondary);
+}
+
+/* ============================
+   꿈 팔기 (Sell Dream) 버튼 + 모달
+   ============================ */
+.btn-sell-dream {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-top: 12px;
+  background: linear-gradient(135deg, #F5F3FF, #EDE9FE);
+  border: 1.5px solid rgba(124, 58, 237, 0.35);
+  border-radius: 14px;
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: transform 0.1s, border-color 0.2s;
+}
+
+.btn-sell-dream:active {
+  transform: scale(0.98);
+  border-color: rgba(124, 58, 237, 0.6);
+}
+
+.sell-dream-emoji {
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(124, 58, 237, 0.12);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.sell-dream-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sell-dream-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.sell-dream-desc {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+}
+
+/* 꿈 팔기 모달 */
+.dream-sell-modal,
+.dream-received-modal {
+  background: var(--bg-surface);
+  border-radius: 20px;
+  width: 92%;
+  max-width: 360px;
+  overflow: hidden;
+  animation: modalPop 0.35s ease;
+  box-shadow: var(--shadow-lg);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.dream-sell-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.dream-sell-header-emoji {
+  font-size: 40px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.dream-sell-title {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+
+.dream-sell-sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.dream-sell-preview {
+  background: linear-gradient(135deg, #FFFBEB, #FEF3C7);
+  border: 1px solid #FDE68A;
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.dream-sell-preview-key {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--gold-text);
+}
+
+.dream-sell-preview-balls {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.dream-sell-name-section {
+  margin-bottom: 14px;
+}
+
+.dream-sell-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.dream-sell-name-row {
+  display: flex;
+  gap: 8px;
+}
+
+.dream-sell-name-input {
+  flex: 1;
+  padding: 12px 14px;
+  background: var(--bg-surface-hover);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.dream-sell-name-input:focus {
+  border-color: #F59E0B;
+  background: #fff;
+}
+
+.dream-sell-dice-btn {
+  width: 46px;
+  height: 46px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-surface);
+  border-radius: 12px;
+  font-size: 20px;
+  cursor: pointer;
+  font-family: inherit;
+  flex-shrink: 0;
+  transition: transform 0.1s, background 0.2s;
+}
+
+.dream-sell-dice-btn:active {
+  transform: scale(0.9);
+  background: var(--bg-surface-hover);
+}
+
+.dream-sell-name-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 4px;
+  display: block;
+}
+
+.dream-sell-shares {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+  padding: 8px;
+  background: var(--bg-surface-hover);
+  border-radius: 10px;
+}
+
+.dream-sell-shares strong {
+  color: var(--gold-text);
+  font-weight: 800;
+}
+
+/* 받은 꿈 모달 */
+.dream-received-modal {
+  padding: 0;
+  text-align: center;
+}
+
+.dream-received-ribbon {
+  background: linear-gradient(135deg, var(--purple), #5B21B6);
+  color: #fff;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.dream-received-content {
+  padding: 24px 20px 16px;
+}
+
+.dream-received-from {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.dream-received-from strong {
+  color: var(--purple-soft);
+  font-weight: 800;
+}
+
+.dream-received-keyword {
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--gold-text);
+  margin-bottom: 16px;
+}
+
+.dream-received-balls {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.dream-received-message {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.dream-received-dim {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.dream-received-modal .btn-primary {
+  margin: 0 20px 8px;
+  width: calc(100% - 40px);
+}
+
+.dream-received-modal .btn-secondary {
+  margin: 0 20px 20px;
+  width: calc(100% - 40px);
+}
+
+/* ============================
    토스트
    ============================ */
 .toast {

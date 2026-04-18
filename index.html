@@ -8,46 +8,68 @@
 </head>
 <body>
   <div id="app">
-    <!-- 화면 1: 온보딩 -->
+    <!-- 화면 1: 온보딩 (3슬라이드) -->
     <div id="screen-onboarding" class="screen active">
-      <div class="screen-content">
-        <div class="hero-emoji">🍀</div>
-        <h1 class="hero-title">행운의 번호</h1>
-        <p class="hero-subtitle">과거 로또 당첨 통계로 찾는<br>나만의 행운 번호</p>
-
-        <div class="features">
-          <div class="feature-item">
-            <span class="feature-icon">📊</span>
-            <div class="feature-text">
-              <strong>1,200회차+ 데이터 분석</strong>
-              <span>역대 모든 당첨번호 통계를 한눈에</span>
+      <div class="onboarding-wrap">
+        <!-- 슬라이드 1: 번호 받기 -->
+        <div class="ob-slide active" data-slide="0">
+          <div class="ob-hero">
+            <div class="ob-demo ob-demo-1">
+              <div class="ob-demo-card"><span>📊</span><strong>조건 조합</strong></div>
+              <div class="ob-demo-card"><span>🌙</span><strong>꿈 키워드</strong></div>
+              <div class="ob-demo-card"><span>🎯</span><strong>직접 고르기</strong></div>
             </div>
           </div>
-          <div class="feature-item">
-            <span class="feature-icon">🗂️</span>
-            <div class="feature-text">
-              <strong>행운조건 번호와 보관함</strong>
-              <span>뜨거운 번호, 직전 번호 등 나만의 전략</span>
-            </div>
-          </div>
-          <div class="feature-item">
-            <span class="feature-icon">🌙</span>
-            <div class="feature-text">
-              <strong>꿈 키워드 행운번호</strong>
-              <span>돼지꿈? 조상꿈? 키워드로 뽑아보는 행운번호</span>
-            </div>
-          </div>
+          <h2 class="ob-title">내 방식대로<br>행운 번호 받기</h2>
+          <p class="ob-desc">6가지 조건으로 조합, 꿈 키워드로 뽑기,<br>직접 고르기까지 ─ 당신에게 맞는 방법으로</p>
         </div>
 
-        <div class="disclaimer-box">
-          <span class="disclaimer-icon">ℹ️</span>
-          <p>로또는 완전한 랜덤 추첨입니다.<br>이 앱은 과거 통계를 활용한 <strong>재미 위주</strong> 번호 추천이며,<br>당첨을 보장하지 않습니다.</p>
+        <!-- 슬라이드 2: 보관 + 자동확인 -->
+        <div class="ob-slide" data-slide="1">
+          <div class="ob-hero">
+            <div class="ob-demo ob-demo-2">
+              <div class="ob-demo-vault">
+                <span class="ob-vault-icon">🗂️</span>
+                <div class="ob-vault-text">
+                  <strong>나의 행운 보관함</strong>
+                  <span>🎉 당첨 2건 · 총 5건</span>
+                </div>
+                <span class="ob-vault-arrow">→</span>
+              </div>
+              <div class="ob-demo-calendar">토요일 20:35 추첨</div>
+            </div>
+          </div>
+          <h2 class="ob-title">토요일만<br>기다리면 돼요</h2>
+          <p class="ob-desc">뽑은 번호를 보관함에 저장해두면<br>추첨 후 앱을 열 때 결과를 알려드려요<br><span class="ob-desc-dim">매주 쓰는 번호는 "자동 보관"으로 한번만 저장</span></p>
         </div>
-        <button class="btn-primary" id="btn-start">행운 뽑기 시작</button>
-      </div>
-      <div class="ad-banner">
-        <span class="ad-label">AD</span>
-        <span class="ad-text">광고 영역</span>
+
+        <!-- 슬라이드 3: 실제 당첨금 -->
+        <div class="ob-slide" data-slide="2">
+          <div class="ob-hero">
+            <div class="ob-demo ob-demo-3">
+              <div class="ob-demo-prize">
+                <div class="ob-prize-rank">🥉 3등 · <strong>163만원</strong></div>
+                <div class="ob-prize-sub">전국 3,079명 당첨 · 제1220회</div>
+              </div>
+            </div>
+          </div>
+          <h2 class="ob-title">당첨됐다면,<br>실제 금액까지</h2>
+          <p class="ob-desc">1,200회차+ 실제 당첨 데이터 기반<br>정확한 당첨금과 전국 당첨자 수를 확인해요</p>
+          <div class="ob-disclaimer">ℹ️ 로또는 완전한 랜덤 추첨입니다. 이 앱은 재미 위주 추천이며 당첨을 보장하지 않습니다.</div>
+        </div>
+
+        <!-- Dots -->
+        <div class="ob-dots">
+          <span class="ob-dot active" data-dot="0"></span>
+          <span class="ob-dot" data-dot="1"></span>
+          <span class="ob-dot" data-dot="2"></span>
+        </div>
+
+        <!-- Controls -->
+        <div class="ob-controls">
+          <button class="btn-primary" id="btn-ob-next">다음</button>
+          <button class="ob-skip" id="btn-ob-skip">건너뛰기</button>
+        </div>
       </div>
     </div>
 
@@ -313,6 +335,15 @@
         </div>
 
         <!-- 3섹션 구조 -->
+        <div class="vault-section" id="section-received">
+          <div class="vault-section-header">
+            <span class="vault-section-icon">🎁</span>
+            <span class="vault-section-title">받은 꿈</span>
+            <span class="vault-section-badge" id="received-count"></span>
+          </div>
+          <div class="vault-list" id="vault-list-received"></div>
+        </div>
+
         <div class="vault-section" id="section-manual">
           <div class="vault-section-header">
             <span class="vault-section-icon">🎯</span>
@@ -406,12 +437,70 @@
             </div>
           </div>
           <div class="keyword-result-balls" id="keyword-result-balls"></div>
+
+          <button class="btn-sell-dream" id="btn-sell-dream">
+            <span class="sell-dream-emoji">💌</span>
+            <div class="sell-dream-info">
+              <span class="sell-dream-title">이 꿈 친구에게 팔기</span>
+              <span class="sell-dream-desc">"내 꿈 사가라" - 행운을 나눠주세요</span>
+            </div>
+          </button>
+
           <button class="btn-save-vault small" id="btn-keyword-save">
             <span class="btn-save-icon">🔖</span>
             <span class="btn-save-label">보관함에 저장</span>
           </button>
           <button class="btn-secondary" id="btn-keyword-retry">다른 키워드로 뽑기</button>
         </div>
+      </div>
+    </div>
+
+    <!-- 꿈 팔기 모달 -->
+    <div id="dream-sell-overlay" class="overlay hidden">
+      <div class="dream-sell-modal">
+        <div class="dream-sell-header">
+          <span class="dream-sell-header-emoji">💌</span>
+          <h3 class="dream-sell-title">내 꿈 사가라</h3>
+          <p class="dream-sell-sub">좋은 꿈은 나눌수록 행운이 따라와요</p>
+        </div>
+
+        <div class="dream-sell-preview">
+          <div class="dream-sell-preview-key" id="dream-sell-key">🐷 돼지꿈</div>
+          <div class="dream-sell-preview-balls" id="dream-sell-balls"></div>
+        </div>
+
+        <div class="dream-sell-name-section">
+          <label class="dream-sell-label">보낸 사람 별명</label>
+          <div class="dream-sell-name-row">
+            <input type="text" class="dream-sell-name-input" id="dream-sell-name" maxlength="15" placeholder="별명 입력">
+            <button class="dream-sell-dice-btn" id="dream-sell-dice">🎲</button>
+          </div>
+          <span class="dream-sell-name-hint">주사위를 눌러 재미있는 별명 자동 생성</span>
+        </div>
+
+        <div class="dream-sell-shares" id="dream-sell-shares">
+          남은 공유: <strong>3</strong> / 3 회
+        </div>
+
+        <button class="btn-primary" id="btn-dream-sell-confirm">💌 공유하기</button>
+        <button class="btn-secondary" id="btn-dream-sell-cancel">취소</button>
+      </div>
+    </div>
+
+    <!-- 받은 꿈 모달 (URL 파라미터로 진입 시) -->
+    <div id="dream-received-overlay" class="overlay hidden">
+      <div class="dream-received-modal">
+        <div class="dream-received-ribbon">🎁 꿈번호 선물받음!</div>
+
+        <div class="dream-received-content">
+          <p class="dream-received-from"><strong id="received-from">초대박행운전도사</strong>님이</p>
+          <div class="dream-received-keyword" id="received-keyword">🐷 돼지꿈의 행운번호</div>
+          <div class="dream-received-balls" id="received-balls"></div>
+          <p class="dream-received-message">를 당신에게 선물했어요!<br><span class="dream-received-dim">"이번 주 대박나세요" 🍀</span></p>
+        </div>
+
+        <button class="btn-primary" id="btn-received-save">🔖 내 보관함에 담기</button>
+        <button class="btn-secondary" id="btn-received-dismiss">나중에 하기</button>
       </div>
     </div>
 

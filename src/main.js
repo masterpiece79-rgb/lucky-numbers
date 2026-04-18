@@ -13,6 +13,11 @@ import { showTossInterstitialAd, showTossRewardedAd } from './toss-sdk.js'
 import { getAllSaved, saveNumbers, deleteItem, updateItem, countManualGroups, deleteGroup } from './storage.js'
 import { checkAllPending, getPrizeLabel, getRankEmoji, getRankLabel, formatPrize, formatWinners } from './matcher.js'
 import { generateFromKeyword, getSuggestedKeywords } from './keyword-numbers.js'
+import { generateFunName } from './name-generator.js'
+import {
+  buildShareUrl, detectReceivedDream, clearDreamParam,
+  getRemainingShares, incrementShareCount, MAX_SHARES_PER_DREAM
+} from './dream-share.js'
 
 // --- State ---
 let lottoData = null
@@ -460,8 +465,11 @@ function renderVault() {
   const items = getAllSaved()
   const emptyEl = document.getElementById('vault-empty')
 
-  // 3섹션 분리
-  // 1) 내가 고른 번호 (manual) - 그룹당 최신 1개만 대표 표시
+  // 4섹션 분리
+  // 1) 받은 꿈 (received)
+  const received = items.filter(i => (i.conditions || []).includes('received'))
+
+  // 2) 내가 고른 번호 (manual) - 그룹당 최신 1개만 대표 표시
   const manualGroups = new Map()
   const manual = []
   for (const item of items) {
@@ -472,15 +480,18 @@ function renderVault() {
     }
   }
 
-  // 2) 추첨 대기 (manual 제외한 pending)
-  const pending = items.filter(i => !i.checked && !i.isManual)
+  // 3) 추첨 대기 (manual/received 제외한 pending)
+  const pending = items.filter(
+    i => !i.checked && !i.isManual && !(i.conditions || []).includes('received')
+  )
 
-  // 3) 지난 결과 (checked)
+  // 4) 지난 결과 (checked) - received/manual도 포함
   const history = items.filter(i => i.checked)
 
   const total = items.length
   if (total === 0) {
     emptyEl.classList.remove('hidden')
+    document.getElementById('section-received').classList.add('hidden')
     document.getElementById('section-manual').classList.add('hidden')
     document.getElementById('section-pending').classList.add('hidden')
     document.getElementById('section-history').classList.add('hidden')
@@ -496,6 +507,7 @@ function renderVault() {
       : `총 ${total}건 · 토요일 추첨 후 앱 열면 결과 확인`
 
   // 섹션별 렌더링
+  renderSection('section-received', 'vault-list-received', 'received-count', received)
   renderSection('section-manual', 'vault-list-manual', 'manual-count', manual)
   renderSection('section-pending', 'vault-list-pending', 'pending-count', pending)
   renderSection('section-history', 'vault-list-history', 'history-count', history)
@@ -657,6 +669,8 @@ async function init() {
     renderStats()
     setupConditions()
     setupKeywordScreen()
+    setupOnboarding()
+    setupDreamPicker()
 
     // 보관함 자동 당첨 확인
     const { newWinnings, totalChecked } = checkAllPending(lottoData)
@@ -669,6 +683,20 @@ async function init() {
     updateVaultBadge()
 
     loadingOverlay.classList.add('hidden')
+
+    // 받은 꿈 감지 (URL 파라미터)
+    const received = detectReceivedDream()
+    if (received) {
+      showReceivedDreamModal(received)
+      clearDreamParam()
+    } else {
+      // 온보딩 스킵 여부 체크
+      const onboarded = localStorage.getItem('onboarding_completed') === 'true'
+      if (onboarded) {
+        switchScreen('stats')
+      }
+    }
+
     console.log('[App] 초기화 완료')
   } catch (err) {
     console.error('[App] 초기화 실패:', err)
@@ -676,12 +704,193 @@ async function init() {
   }
 }
 
-// --- Event Listeners ---
-document.getElementById('btn-start').addEventListener('click', () => {
-  switchScreen('stats')
-  haptic('light')
-})
+// --- Onboarding Slides ---
+let obCurrent = 0
+function setupOnboarding() {
+  const slides = document.querySelectorAll('.ob-slide')
+  const dots = document.querySelectorAll('.ob-dot')
+  const nextBtn = document.getElementById('btn-ob-next')
+  const skipBtn = document.getElementById('btn-ob-skip')
 
+  function gotoSlide(idx) {
+    obCurrent = idx
+    slides.forEach((s, i) => s.classList.toggle('active', i === idx))
+    dots.forEach((d, i) => d.classList.toggle('active', i === idx))
+    nextBtn.textContent = idx === slides.length - 1 ? '🍀 시작하기' : '다음'
+    haptic('light')
+  }
+
+  nextBtn.addEventListener('click', () => {
+    if (obCurrent < slides.length - 1) {
+      gotoSlide(obCurrent + 1)
+    } else {
+      finishOnboarding()
+    }
+  })
+
+  skipBtn.addEventListener('click', () => {
+    finishOnboarding()
+  })
+
+  // 스와이프 지원 (간단)
+  let touchStartX = null
+  document.getElementById('screen-onboarding').addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX
+  })
+  document.getElementById('screen-onboarding').addEventListener('touchend', e => {
+    if (touchStartX === null) return
+    const dx = e.changedTouches[0].clientX - touchStartX
+    if (Math.abs(dx) > 60) {
+      if (dx < 0 && obCurrent < slides.length - 1) gotoSlide(obCurrent + 1)
+      if (dx > 0 && obCurrent > 0) gotoSlide(obCurrent - 1)
+    }
+    touchStartX = null
+  })
+}
+
+function finishOnboarding() {
+  localStorage.setItem('onboarding_completed', 'true')
+  switchScreen('stats')
+  haptic('heavy')
+}
+
+// --- Dream Share (팔기) ---
+let currentDreamShare = null // { numbers, keyword, emoji }
+
+function openDreamShareModal() {
+  if (!currentKeywordResult) return
+  currentDreamShare = {
+    numbers: currentKeywordResult.numbers,
+    keyword: currentKeywordResult.matched || currentKeywordResult.keyword,
+    emoji: currentKeywordResult.emoji,
+  }
+
+  const remaining = getRemainingShares(currentDreamShare.numbers, currentDreamShare.keyword)
+  if (remaining === 0) {
+    showToast('이 꿈은 이미 3회 모두 공유했어요', 3000)
+    return
+  }
+
+  // 미리보기 렌더링
+  document.getElementById('dream-sell-key').textContent =
+    `${currentDreamShare.emoji} ${currentDreamShare.keyword}꿈`
+  document.getElementById('dream-sell-balls').innerHTML =
+    currentDreamShare.numbers.map(n => createBallHTML(n, 's')).join('')
+
+  // 이름 자동 생성
+  document.getElementById('dream-sell-name').value = generateFunName()
+
+  // 남은 공유 표시
+  document.getElementById('dream-sell-shares').innerHTML =
+    `남은 공유: <strong>${remaining}</strong> / ${MAX_SHARES_PER_DREAM} 회`
+
+  document.getElementById('dream-sell-overlay').classList.remove('hidden')
+}
+
+function closeDreamShareModal() {
+  document.getElementById('dream-sell-overlay').classList.add('hidden')
+  currentDreamShare = null
+}
+
+function rerollName() {
+  document.getElementById('dream-sell-name').value = generateFunName()
+  haptic('light')
+}
+
+async function confirmDreamShare() {
+  if (!currentDreamShare) return
+  const nameInput = document.getElementById('dream-sell-name')
+  const from = (nameInput.value || '').trim() || generateFunName()
+
+  const { url, tossUrl, payload } = buildShareUrl({
+    ...currentDreamShare,
+    from,
+  })
+
+  // 공유 실행
+  const shareText = `💌 "${from}"님의 ${currentDreamShare.emoji} ${currentDreamShare.keyword}꿈 행운번호 받아가세요!\n\n이번 주 대박나세요 🍀`
+  const shareData = {
+    title: '🍀 꿈번호 선물',
+    text: shareText,
+    url,
+  }
+
+  let shared = false
+  try {
+    if (isInToss && window.__APPS_IN_TOSS__?.share) {
+      await window.__APPS_IN_TOSS__.share(shareData)
+      shared = true
+    } else if (navigator.share) {
+      await navigator.share(shareData)
+      shared = true
+    } else {
+      // Fallback: 클립보드
+      await navigator.clipboard.writeText(`${shareText}\n${url}`)
+      showToast('링크가 복사되었어요. 친구에게 붙여넣기 해주세요!', 3000)
+      shared = true
+    }
+  } catch (e) {
+    // 유저가 공유 취소한 경우 - 카운트 안 올림
+    console.log('[DreamShare] 취소 또는 실패', e)
+    return
+  }
+
+  if (shared) {
+    const { remaining } = incrementShareCount(currentDreamShare.numbers, currentDreamShare.keyword)
+    showToast(`💌 꿈을 보냈어요! 남은 공유 ${remaining}회`, 2500)
+    haptic('heavy')
+    closeDreamShareModal()
+  }
+}
+
+// --- Dream Received (받기) ---
+let currentReceivedDream = null
+
+function showReceivedDreamModal(dream) {
+  currentReceivedDream = dream
+  document.getElementById('received-from').textContent = dream.from
+  document.getElementById('received-keyword').textContent =
+    `${dream.emoji} ${dream.keyword}꿈의 행운번호`
+  document.getElementById('received-balls').innerHTML =
+    dream.numbers.map(n => createBallHTML(n, 's')).join('')
+  document.getElementById('dream-received-overlay').classList.remove('hidden')
+  haptic('heavy')
+}
+
+function closeReceivedDreamModal(saveToVault = false) {
+  if (saveToVault && currentReceivedDream) {
+    const drawNo = getLatestRound(lottoData).draw_no + 1
+    saveNumbers({
+      numbers: currentReceivedDream.numbers,
+      conditions: ['received'],
+      targetDrawNo: drawNo,
+      label: `🎁 ${currentReceivedDream.from}님의 ${currentReceivedDream.emoji} ${currentReceivedDream.keyword}꿈`,
+    })
+    showToast('🎁 받은 꿈이 보관함에 저장되었어요', 2500)
+    updateVaultBadge()
+  }
+  document.getElementById('dream-received-overlay').classList.add('hidden')
+  currentReceivedDream = null
+
+  // 저장했으면 보관함으로, 아니면 통계 화면으로
+  if (saveToVault) {
+    renderVault()
+    switchScreen('vault')
+  } else {
+    switchScreen('stats')
+  }
+}
+
+function setupDreamPicker() {
+  document.getElementById('btn-sell-dream').addEventListener('click', openDreamShareModal)
+  document.getElementById('btn-dream-sell-cancel').addEventListener('click', closeDreamShareModal)
+  document.getElementById('btn-dream-sell-confirm').addEventListener('click', confirmDreamShare)
+  document.getElementById('dream-sell-dice').addEventListener('click', rerollName)
+  document.getElementById('btn-received-save').addEventListener('click', () => closeReceivedDreamModal(true))
+  document.getElementById('btn-received-dismiss').addEventListener('click', () => closeReceivedDreamModal(false))
+}
+
+// --- Event Listeners ---
 document.getElementById('btn-go-conditions').addEventListener('click', () => {
   switchScreen('conditions')
   haptic('light')
