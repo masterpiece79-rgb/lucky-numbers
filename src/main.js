@@ -446,6 +446,17 @@ function renderVaultItem(item) {
     ? `data-group-id="${item.groupId}"`
     : `data-id="${item.id}"`
 
+  // 당첨 자랑 섹션 (당첨된 경우)
+  const isReceived = (item.conditions || []).includes('received')
+  const bragHTML = isWin ? `
+    <div class="vault-brag-section">
+      ${isReceived ? '<div class="brag-thanks">💌 꿈 선물 덕분에 당첨됐어요!</div>' : ''}
+      <button class="btn-brag" data-item-id="${item.id}">
+        📣 ${isReceived ? '감사 인사 전하기' : '당첨 자랑하기'}
+      </button>
+    </div>
+  ` : ''
+
   return `
     <div class="vault-item${isWin ? ' win' : ''}">
       <div class="vault-item-top">
@@ -454,6 +465,7 @@ function renderVaultItem(item) {
       </div>
       <div class="vault-item-balls">${ballsHTML}</div>
       ${resultHTML}
+      ${bragHTML}
       <div class="vault-item-actions">
         <button class="vault-item-delete" ${deleteDataAttr}>${item.isPermanent ? '자동 보관 해제' : '삭제'}</button>
       </div>
@@ -511,6 +523,15 @@ function renderVault() {
   renderSection('section-manual', 'vault-list-manual', 'manual-count', manual)
   renderSection('section-pending', 'vault-list-pending', 'pending-count', pending)
   renderSection('section-history', 'vault-list-history', 'history-count', history)
+
+  // 당첨 자랑 버튼 바인딩
+  document.querySelectorAll('.btn-brag').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const itemId = Number(e.currentTarget.dataset.itemId)
+      const item = getAllSaved().find(i => i.id === itemId)
+      if (item) bragWin(item)
+    })
+  })
 
   // 삭제 버튼 바인딩
   document.querySelectorAll('.vault-item-delete').forEach(btn => {
@@ -671,6 +692,7 @@ async function init() {
     setupKeywordScreen()
     setupOnboarding()
     setupDreamPicker()
+    setupLottoBuyButtons()
 
     // 보관함 자동 당첨 확인
     const { newWinnings, totalChecked } = checkAllPending(lottoData)
@@ -878,6 +900,80 @@ function closeReceivedDreamModal(saveToVault = false) {
     switchScreen('vault')
   } else {
     switchScreen('stats')
+  }
+}
+
+// --- 로또 구매 연결 ---
+function openExternalUrl(url) {
+  try {
+    // 토스 SDK의 openUrl이 있으면 사용
+    if (isInToss && window.__APPS_IN_TOSS__?.openUrl) {
+      window.__APPS_IN_TOSS__.openUrl(url)
+    } else {
+      window.open(url, '_blank')
+    }
+  } catch (e) {
+    // Fallback: location 이동
+    window.location.href = url
+  }
+  haptic('light')
+}
+
+function findLottoStore() {
+  // 네이버 지도 로또판매점 검색 (웹 URL이 가장 호환성 좋음)
+  openExternalUrl('https://map.naver.com/p/search/로또판매점')
+}
+
+function openOnlineLotto() {
+  // 동행복권 공식 사이트 (대한민국 유일의 합법 온라인 로또)
+  openExternalUrl('https://dhlottery.co.kr')
+}
+
+function setupLottoBuyButtons() {
+  // class 기반으로 모든 인스턴스에 바인딩
+  document.querySelectorAll('.btn-find-store').forEach(btn => {
+    btn.addEventListener('click', findLottoStore)
+  })
+  document.querySelectorAll('.btn-online-lotto').forEach(btn => {
+    btn.addEventListener('click', openOnlineLotto)
+  })
+}
+
+// --- 당첨 자랑하기 ---
+function bragWin(item) {
+  const rankLabel = getRankLabel(item.result.rank)
+  const prizeText = item.prizeInfo?.prize ? formatPrize(item.prizeInfo.prize) : ''
+  const isReceived = (item.conditions || []).includes('received')
+
+  let shareText
+  if (isReceived) {
+    // 받은 꿈으로 당첨 → 감사 메시지
+    const fromMatch = item.label.match(/(.+?)님의/)
+    const fromName = fromMatch ? fromMatch[1].replace(/^🎁\s*/, '') : '친구'
+    shareText = `🎉 ${fromName}님이 준 꿈번호로 ${rankLabel} 당첨됐어요!${prizeText ? ` (${prizeText})` : ''} 행운을 나눠주셔서 감사해요 🍀\n\n나도 꿈번호 받아보기 👉`
+  } else {
+    shareText = `🎉 "행운의 번호" 앱으로 ${rankLabel} 당첨됐어요!${prizeText ? ` (${prizeText})` : ''} 이번주 여러분도 대박나세요 🍀\n\n나도 뽑아보기 👉`
+  }
+
+  const url = 'https://lucky-numbers-miniapp.vercel.app'
+  const shareData = {
+    title: `🍀 ${rankLabel} 당첨!`,
+    text: shareText,
+    url,
+  }
+
+  try {
+    if (isInToss && window.__APPS_IN_TOSS__?.share) {
+      window.__APPS_IN_TOSS__.share(shareData)
+    } else if (navigator.share) {
+      navigator.share(shareData).catch(() => {})
+    } else {
+      navigator.clipboard?.writeText(`${shareText}\n${url}`)
+      showToast('자랑 문구가 복사되었어요!', 2500)
+    }
+    haptic('heavy')
+  } catch (e) {
+    console.error('[Brag] 실패:', e)
   }
 }
 
