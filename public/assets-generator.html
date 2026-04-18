@@ -228,27 +228,29 @@ function drawGoldText(ctx, text, x, y, size) {
   ctx.restore();
 }
 
-// === 로고 라이트 ===
+// === 로고 라이트 (v2: 크림 배경 + 중앙 큰 클로버) ===
 function renderLogoLight() {
   const c = document.getElementById('logo-light');
   const ctx = c.getContext('2d');
-  // 밝은 배경
-  const grad = ctx.createRadialGradient(300, 300, 50, 300, 300, 350);
-  grad.addColorStop(0, '#1a2040');
-  grad.addColorStop(1, '#0a0e27');
-  ctx.fillStyle = grad;
+
+  // 크림톤 그라데이션 배경 (모서리 살짝 어둡게)
+  const bg = ctx.createRadialGradient(300, 300, 100, 300, 300, 420);
+  bg.addColorStop(0, '#FFFFFF');
+  bg.addColorStop(0.7, '#FFFBEB');
+  bg.addColorStop(1, '#FEF3C7');
+  ctx.fillStyle = bg;
   ctx.fillRect(0, 0, 600, 600);
-  // 글로우
-  const glow = ctx.createRadialGradient(300, 240, 20, 300, 240, 200);
-  glow.addColorStop(0, 'rgba(255,215,0,0.15)');
-  glow.addColorStop(1, 'transparent');
-  ctx.fillStyle = glow;
+
+  // 골드 후광 (뒤에 은은하게)
+  const halo = ctx.createRadialGradient(300, 300, 30, 300, 300, 260);
+  halo.addColorStop(0, 'rgba(255, 215, 0, 0.35)');
+  halo.addColorStop(0.5, 'rgba(255, 215, 0, 0.12)');
+  halo.addColorStop(1, 'transparent');
+  ctx.fillStyle = halo;
   ctx.fillRect(0, 0, 600, 600);
-  // 클로버
-  drawClover(ctx, 300, 230, 140);
-  // 텍스트
-  drawGoldText(ctx, '행운의', 300, 400, 60);
-  drawGoldText(ctx, '번호', 300, 475, 60);
+
+  // 클로버 큰 크기로 중앙에
+  drawClover(ctx, 300, 300, 220);
 }
 
 // === 로고 다크 ===

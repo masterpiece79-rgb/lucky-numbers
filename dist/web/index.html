@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
   <title>행운의 번호</title>
-  <script type="module" crossorigin src="./assets/index-Dsc0wZ7S.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-zkEpZJ0Z.css">
+  <script type="module" crossorigin src="./assets/index-B7CoukHs.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-B8ySi9OV.css">
 </head>
 <body>
   <div id="app">
@@ -61,7 +61,7 @@
             <span class="vault-badge hidden" id="vault-badge">0</span>
           </div>
           <div class="vault-entry-card-bottom">
-            <span class="vault-entry-card-title">나의 번호 보관함</span>
+            <span class="vault-entry-card-title">나의 행운 보관함</span>
             <span class="vault-entry-card-desc" id="vault-entry-card-desc">번호 저장 후 토요일 추첨 후 앱에 다시 오면 결과 확인</span>
           </div>
         </button>
@@ -285,9 +285,18 @@
       <div class="screen-content">
         <div class="vault-header">
           <button class="icon-btn" id="btn-vault-back" aria-label="뒤로">←</button>
-          <h2 class="section-title vault-title">🗂️ 나의 보관함</h2>
+          <h2 class="section-title vault-title">🗂️ 나의 행운 보관함</h2>
         </div>
         <p class="section-desc" id="vault-desc">저장한 번호 · 토요일 추첨 후 앱 열면 결과 확인</p>
+
+        <button class="add-manual-btn" id="btn-add-manual">
+          <span class="add-manual-icon">➕</span>
+          <div class="add-manual-info">
+            <span class="add-manual-title">내 번호 직접 고르기</span>
+            <span class="add-manual-desc">평소 쓰는 번호를 저장하고 매주 자동 등록</span>
+          </div>
+          <span class="add-manual-arrow">→</span>
+        </button>
 
         <div class="vault-notice">
           <span class="vault-notice-icon">⚠️</span>
@@ -301,10 +310,63 @@
         <div class="vault-empty hidden" id="vault-empty">
           <div class="vault-empty-emoji">🗂️</div>
           <p class="vault-empty-title">아직 보관한 번호가 없어요</p>
-          <p class="vault-empty-desc">번호를 뽑고 "보관함에 저장"을 눌러보세요.<br>추첨 후 당첨 여부를 자동으로 알려드려요.</p>
+          <p class="vault-empty-desc">번호를 뽑거나 직접 고르고<br>"보관함에 저장"을 눌러보세요.</p>
         </div>
 
-        <div class="vault-list" id="vault-list"></div>
+        <!-- 3섹션 구조 -->
+        <div class="vault-section" id="section-manual">
+          <div class="vault-section-header">
+            <span class="vault-section-icon">🎯</span>
+            <span class="vault-section-title">내가 고른 번호</span>
+            <span class="vault-section-badge" id="manual-count"></span>
+          </div>
+          <div class="vault-list" id="vault-list-manual"></div>
+        </div>
+
+        <div class="vault-section" id="section-pending">
+          <div class="vault-section-header">
+            <span class="vault-section-icon">🔔</span>
+            <span class="vault-section-title">추첨 대기 중</span>
+            <span class="vault-section-badge" id="pending-count"></span>
+          </div>
+          <div class="vault-list" id="vault-list-pending"></div>
+        </div>
+
+        <div class="vault-section" id="section-history">
+          <div class="vault-section-header">
+            <span class="vault-section-icon">📜</span>
+            <span class="vault-section-title">지난 회차 결과</span>
+            <span class="vault-section-badge" id="history-count"></span>
+          </div>
+          <div class="vault-list" id="vault-list-history"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 화면 7: 번호 직접 고르기 -->
+    <div id="screen-picker" class="screen">
+      <div class="screen-content">
+        <div class="vault-header">
+          <button class="icon-btn" id="btn-picker-back" aria-label="뒤로">←</button>
+          <h2 class="section-title vault-title">🎯 내 번호 고르기</h2>
+        </div>
+        <p class="section-desc">평소 쓰는 6개 번호를 선택해주세요 · <span id="picker-count">0</span> / 6</p>
+
+        <div class="picker-grid" id="picker-grid"></div>
+
+        <div class="picker-permanent-toggle">
+          <label class="toggle-row">
+            <input type="checkbox" id="picker-permanent" checked>
+            <span class="toggle-label">
+              <strong>매주 자동 보관</strong>
+              <span class="toggle-sub">추첨 후 다음 회차에도 자동으로 등록돼요</span>
+            </span>
+            <span class="toggle-switch"></span>
+          </label>
+        </div>
+
+        <button class="btn-primary" id="btn-picker-save" disabled>보관함에 저장</button>
+        <button class="btn-secondary" id="btn-picker-clear">선택 초기화</button>
       </div>
     </div>
 
@@ -325,6 +387,15 @@
         <button class="btn-primary" id="btn-keyword-generate" disabled>
           🌙 광고 시청하고 번호 받기
         </button>
+
+        <div class="keyword-notice">
+          <span class="keyword-notice-icon">ℹ️</span>
+          <p>
+            키워드별로 <strong>전통 꿈풀이와 문화적 상징</strong>을 담은<br>
+            번호 풀에서 무작위로 6개를 뽑아드려요.<br>
+            <span class="keyword-notice-dim">통계 기반이 아닌 재미 위주 추천입니다.</span>
+          </p>
+        </div>
 
         <!-- 키워드 결과 -->
         <div class="keyword-result hidden" id="keyword-result">

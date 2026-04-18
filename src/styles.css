@@ -1643,6 +1643,276 @@ body {
 }
 
 /* ============================
+   보관함 - 직접 번호 고르기 진입 버튼
+   ============================ */
+.add-manual-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #FFFBEB, #FEF3C7);
+  border: 1.5px dashed rgba(245, 158, 11, 0.5);
+  border-radius: 14px;
+  cursor: pointer;
+  color: var(--text);
+  font-family: inherit;
+  text-align: left;
+  margin-bottom: 14px;
+  transition: transform 0.1s, border-color 0.2s;
+}
+
+.add-manual-btn:active {
+  transform: scale(0.98);
+  border-color: #F59E0B;
+}
+
+.add-manual-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(245, 158, 11, 0.15);
+  border-radius: 10px;
+  font-size: 18px;
+  flex-shrink: 0;
+  color: var(--gold-text);
+}
+
+.add-manual-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.add-manual-title {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.add-manual-desc {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+}
+
+.add-manual-arrow {
+  font-size: 16px;
+  color: var(--gold-text);
+  font-weight: 700;
+}
+
+/* ============================
+   보관함 - 섹션
+   ============================ */
+.vault-section {
+  width: 100%;
+  margin-top: 22px;
+}
+
+.vault-section.hidden {
+  display: none;
+}
+
+.vault-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 0 2px;
+}
+
+.vault-section-icon {
+  font-size: 16px;
+}
+
+.vault-section-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.vault-section-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  background: var(--bg-surface-active);
+  color: var(--text-secondary);
+  border-radius: 10px;
+}
+
+/* 영구보관 뱃지 (아이템 안) */
+.permanent-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--gold-text);
+  border-radius: 6px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.vault-item-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+/* ============================
+   번호 직접 고르기 (Picker)
+   ============================ */
+.picker-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin: 20px 0;
+}
+
+.picker-num {
+  aspect-ratio: 1;
+  border: none;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  position: relative;
+  transition: transform 0.1s, background 0.2s;
+}
+
+.picker-num:active {
+  transform: scale(0.9);
+}
+
+.picker-num.selected {
+  color: #fff;
+  border: 2px solid rgba(0,0,0,0.1);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.picker-num.selected.ball-1 { background: var(--ball-1); }
+.picker-num.selected.ball-2 { background: var(--ball-2); }
+.picker-num.selected.ball-3 { background: var(--ball-3); }
+.picker-num.selected.ball-4 { background: var(--ball-4); }
+.picker-num.selected.ball-5 { background: var(--ball-5); }
+
+/* 토글 (매주 자동) */
+.picker-permanent-toggle {
+  width: 100%;
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.toggle-row input[type="checkbox"] {
+  display: none;
+}
+
+.toggle-label {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.toggle-label strong {
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.toggle-sub {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.toggle-switch {
+  width: 44px;
+  height: 26px;
+  background: var(--bg-surface-active);
+  border-radius: 13px;
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.25s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  transition: transform 0.25s;
+}
+
+.toggle-row input:checked ~ .toggle-switch {
+  background: #F59E0B;
+}
+
+.toggle-row input:checked ~ .toggle-switch::after {
+  transform: translateX(18px);
+}
+
+/* ============================
+   키워드 화면 안내
+   ============================ */
+.keyword-notice {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-top: 16px;
+}
+
+.keyword-notice-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--purple);
+}
+
+.keyword-notice p {
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.keyword-notice strong {
+  color: var(--purple-soft);
+  font-weight: 800;
+}
+
+.keyword-notice-dim {
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+/* ============================
    토스트
    ============================ */
 .toast {

@@ -10,7 +10,7 @@ import {
 } from './lotto-data.js'
 import { generateLuckyNumbers, generateFiveGames } from './generator.js'
 import { showTossInterstitialAd, showTossRewardedAd } from './toss-sdk.js'
-import { getAllSaved, saveNumbers, deleteItem, updateItem } from './storage.js'
+import { getAllSaved, saveNumbers, deleteItem, updateItem, countManualGroups, deleteGroup } from './storage.js'
 import { checkAllPending, getPrizeLabel, getRankEmoji, getRankLabel, formatPrize, formatWinners } from './matcher.js'
 import { generateFromKeyword, getSuggestedKeywords } from './keyword-numbers.js'
 
@@ -33,6 +33,7 @@ const screens = {
   result: document.getElementById('screen-result'),
   vault: document.getElementById('screen-vault'),
   keyword: document.getElementById('screen-keyword'),
+  picker: document.getElementById('screen-picker'),
 }
 
 const loadingOverlay = document.getElementById('loading-overlay')
@@ -393,93 +394,226 @@ function saveKeywordToVault() {
 }
 
 // --- 보관함 화면 ---
-function renderVault() {
-  const items = getAllSaved()
-  const listEl = document.getElementById('vault-list')
-  const emptyEl = document.getElementById('vault-empty')
+function renderVaultItem(item) {
+  const isWin = item.result && item.result.rank > 0
+  const isPending = !item.checked
+  const winningSet = item.drawNumbers ? new Set(item.drawNumbers) : null
 
-  if (items.length === 0) {
-    emptyEl.classList.remove('hidden')
-    listEl.innerHTML = ''
-    return
+  const ballsHTML = item.numbers.map(n => {
+    const matched = winningSet && winningSet.has(n)
+    const cls = getBallClass(n)
+    const extra = matched ? ' matched' : ''
+    return `<span class="lotto-ball s ${cls}${extra}"${matched ? ' style="outline:2px solid #F59E0B"' : ''}>${n}</span>`
+  }).join('')
+
+  const date = new Date(item.savedAt)
+  const dateStr = `${date.getMonth()+1}/${date.getDate()}`
+
+  let resultHTML = ''
+  if (isPending) {
+    resultHTML = `<div class="vault-item-result pending">⏳ 제${item.targetDrawNo}회 추첨 대기 중</div>`
+  } else if (isWin) {
+    const rankLabel = getRankLabel(item.result.rank)
+    const matchText = `${item.result.matches}개 일치${item.result.bonus ? '+보너스' : ''}`
+    let prizeText = ''
+    if (item.prizeInfo && item.prizeInfo.prize) {
+      prizeText = ` · <strong>${formatPrize(item.prizeInfo.prize)}</strong>`
+    }
+    let winnersText = ''
+    if (item.prizeInfo && item.prizeInfo.winners) {
+      winnersText = `<div class="vault-item-subresult">전국 ${formatWinners(item.prizeInfo.winners)} · 제${item.targetDrawNo}회</div>`
+    }
+    resultHTML = `
+      <div class="vault-item-result win-row">
+        <span>${rankLabel} · ${matchText}${prizeText}</span>
+      </div>
+      ${winnersText}
+    `
+  } else {
+    resultHTML = `<div class="vault-item-result lose">제${item.targetDrawNo}회 · ${item.result.matches}개 일치 (낙첨)</div>`
   }
 
+  const permanentBadge = item.isPermanent
+    ? `<span class="permanent-badge">🔁 매주 자동</span>`
+    : ''
+
+  const deleteDataAttr = item.isPermanent
+    ? `data-group-id="${item.groupId}"`
+    : `data-id="${item.id}"`
+
+  return `
+    <div class="vault-item${isWin ? ' win' : ''}">
+      <div class="vault-item-top">
+        <span class="vault-item-label">${item.label} ${permanentBadge}</span>
+        <span class="vault-item-date">${dateStr}</span>
+      </div>
+      <div class="vault-item-balls">${ballsHTML}</div>
+      ${resultHTML}
+      <div class="vault-item-actions">
+        <button class="vault-item-delete" ${deleteDataAttr}>${item.isPermanent ? '자동 보관 해제' : '삭제'}</button>
+      </div>
+    </div>
+  `
+}
+
+function renderVault() {
+  const items = getAllSaved()
+  const emptyEl = document.getElementById('vault-empty')
+
+  // 3섹션 분리
+  // 1) 내가 고른 번호 (manual) - 그룹당 최신 1개만 대표 표시
+  const manualGroups = new Map()
+  const manual = []
+  for (const item of items) {
+    if (!item.isManual) continue
+    if (!manualGroups.has(item.groupId)) {
+      manualGroups.set(item.groupId, true)
+      manual.push(item)
+    }
+  }
+
+  // 2) 추첨 대기 (manual 제외한 pending)
+  const pending = items.filter(i => !i.checked && !i.isManual)
+
+  // 3) 지난 결과 (checked)
+  const history = items.filter(i => i.checked)
+
+  const total = items.length
+  if (total === 0) {
+    emptyEl.classList.remove('hidden')
+    document.getElementById('section-manual').classList.add('hidden')
+    document.getElementById('section-pending').classList.add('hidden')
+    document.getElementById('section-history').classList.add('hidden')
+    document.getElementById('vault-desc').textContent = '번호 저장 후 토요일 추첨 후 앱 열면 결과 확인'
+    return
+  }
   emptyEl.classList.add('hidden')
 
   const winCount = items.filter(i => i.result && i.result.rank > 0).length
   document.getElementById('vault-desc').textContent =
     winCount > 0
-      ? `🎉 당첨 ${winCount}건 · 총 ${items.length}건 보관 중`
-      : `총 ${items.length}건 · 토요일 추첨 후 앱 열면 결과 확인`
+      ? `🎉 당첨 ${winCount}건 · 총 ${total}건 보관 중`
+      : `총 ${total}건 · 토요일 추첨 후 앱 열면 결과 확인`
 
-  listEl.innerHTML = items.map(item => {
-    const isWin = item.result && item.result.rank > 0
-    const isPending = !item.checked
-    const winningSet = item.drawNumbers ? new Set(item.drawNumbers) : null
+  // 섹션별 렌더링
+  renderSection('section-manual', 'vault-list-manual', 'manual-count', manual)
+  renderSection('section-pending', 'vault-list-pending', 'pending-count', pending)
+  renderSection('section-history', 'vault-list-history', 'history-count', history)
 
-    const ballsHTML = item.numbers.map(n => {
-      const matched = winningSet && winningSet.has(n)
-      const bonus = item.drawBonus && n === item.drawBonus
-      const cls = getBallClass(n)
-      const extra = matched ? ' matched' : (bonus ? ' bonus' : '')
-      return `<span class="lotto-ball s ${cls}${extra}"${matched ? ' style="outline:2px solid #FFD700"' : ''}>${n}</span>`
-    }).join('')
-
-    const date = new Date(item.savedAt)
-    const dateStr = `${date.getMonth()+1}/${date.getDate()}`
-
-    let resultHTML = ''
-    if (isPending) {
-      resultHTML = `<div class="vault-item-result pending">⏳ 제${item.targetDrawNo}회 추첨 대기 중</div>`
-    } else if (isWin) {
-      const rankLabel = getRankLabel(item.result.rank)
-      const matchText = `${item.result.matches}개 일치${item.result.bonus ? '+보너스' : ''}`
-      let prizeText = ''
-      if (item.prizeInfo && item.prizeInfo.prize) {
-        prizeText = ` · <strong>${formatPrize(item.prizeInfo.prize)}</strong>`
-      }
-      let winnersText = ''
-      if (item.prizeInfo && item.prizeInfo.winners) {
-        winnersText = `<div class="vault-item-subresult">전국 ${formatWinners(item.prizeInfo.winners)} · 제${item.targetDrawNo}회</div>`
-      }
-      resultHTML = `
-        <div class="vault-item-result win-row">
-          <span>${rankLabel} · ${matchText}${prizeText}</span>
-        </div>
-        ${winnersText}
-      `
-    } else {
-      resultHTML = `<div class="vault-item-result lose">제${item.targetDrawNo}회 · ${item.result.matches}개 일치 (낙첨)</div>`
-    }
-
-    return `
-      <div class="vault-item${isWin ? ' win' : ''}">
-        <div class="vault-item-top">
-          <span class="vault-item-label">${item.label}</span>
-          <span class="vault-item-date">${dateStr}</span>
-        </div>
-        <div class="vault-item-balls">${ballsHTML}</div>
-        ${resultHTML}
-        <div class="vault-item-top">
-          <span class="vault-item-date">ID: ${item.id}</span>
-          <button class="vault-item-delete" data-id="${item.id}">삭제</button>
-        </div>
-      </div>
-    `
-  }).join('')
-
-  // 삭제 버튼
-  listEl.querySelectorAll('.vault-item-delete').forEach(btn => {
+  // 삭제 버튼 바인딩
+  document.querySelectorAll('.vault-item-delete').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      const id = Number(e.target.dataset.id)
-      if (confirm('이 번호를 삭제할까요?')) {
-        deleteItem(id)
-        renderVault()
-        updateVaultBadge()
-        haptic('light')
+      const groupId = e.target.dataset.groupId
+      const id = e.target.dataset.id
+      if (groupId) {
+        if (confirm('이 번호 그룹을 삭제할까요? (매주 자동 보관이 중단됩니다)')) {
+          deleteGroup(Number(groupId))
+          renderVault()
+          updateVaultBadge()
+          haptic('light')
+        }
+      } else if (id) {
+        if (confirm('이 번호를 삭제할까요?')) {
+          deleteItem(Number(id))
+          renderVault()
+          updateVaultBadge()
+          haptic('light')
+        }
       }
     })
   })
+}
+
+function renderSection(sectionId, listId, countId, items) {
+  const section = document.getElementById(sectionId)
+  const list = document.getElementById(listId)
+  const count = document.getElementById(countId)
+  if (items.length === 0) {
+    section.classList.add('hidden')
+    return
+  }
+  section.classList.remove('hidden')
+  count.textContent = `${items.length}`
+  list.innerHTML = items.map(renderVaultItem).join('')
+}
+
+// --- 번호 직접 고르기 (Picker) ---
+let pickerSelected = []
+
+function renderPickerGrid() {
+  const grid = document.getElementById('picker-grid')
+  grid.innerHTML = ''
+  for (let n = 1; n <= 45; n++) {
+    const btn = document.createElement('button')
+    btn.className = `picker-num ${getBallClass(n)}`
+    btn.dataset.num = n
+    btn.textContent = n
+    if (pickerSelected.includes(n)) btn.classList.add('selected')
+    btn.addEventListener('click', () => togglePickerNum(n))
+    grid.appendChild(btn)
+  }
+}
+
+function togglePickerNum(n) {
+  const idx = pickerSelected.indexOf(n)
+  if (idx >= 0) {
+    pickerSelected.splice(idx, 1)
+  } else {
+    if (pickerSelected.length >= 6) {
+      showToast('6개까지만 선택할 수 있어요')
+      return
+    }
+    pickerSelected.push(n)
+  }
+  document.getElementById('picker-count').textContent = pickerSelected.length
+  document.getElementById('btn-picker-save').disabled = pickerSelected.length !== 6
+  renderPickerGrid()
+  haptic('light')
+}
+
+function clearPicker() {
+  pickerSelected = []
+  document.getElementById('picker-count').textContent = '0'
+  document.getElementById('btn-picker-save').disabled = true
+  renderPickerGrid()
+  haptic('light')
+}
+
+function openPicker() {
+  const groups = countManualGroups()
+  if (groups >= 5) {
+    showToast('최대 5개까지 보관할 수 있어요. 기존 번호를 먼저 삭제해주세요', 3500)
+    return
+  }
+  pickerSelected = []
+  document.getElementById('picker-count').textContent = '0'
+  document.getElementById('btn-picker-save').disabled = true
+  document.getElementById('picker-permanent').checked = true
+  renderPickerGrid()
+  switchScreen('picker')
+}
+
+function savePickerNumbers() {
+  if (pickerSelected.length !== 6) return
+  const isPermanent = document.getElementById('picker-permanent').checked
+  const drawNo = getLatestRound(lottoData).draw_no + 1
+  const sorted = [...pickerSelected].sort((a, b) => a - b)
+  const label = isPermanent ? '내가 고른 번호 (매주)' : '내가 고른 번호'
+
+  saveNumbers({
+    numbers: sorted,
+    conditions: ['manual'],
+    targetDrawNo: drawNo,
+    label,
+    isManual: true,
+    isPermanent,
+  })
+
+  showToast('🎯 내 번호가 보관함에 저장되었어요')
+  haptic('heavy')
+  updateVaultBadge()
+  renderVault()
+  switchScreen('vault')
 }
 
 function updateVaultBadge() {
@@ -623,6 +757,22 @@ document.getElementById('btn-keyword-retry').addEventListener('click', () => {
   document.getElementById('btn-keyword-generate').disabled = true
   document.querySelectorAll('.keyword-chip').forEach(c => c.classList.remove('selected'))
   haptic('light')
+})
+
+// 번호 직접 고르기
+document.getElementById('btn-add-manual').addEventListener('click', () => {
+  openPicker()
+  haptic('light')
+})
+document.getElementById('btn-picker-back').addEventListener('click', () => {
+  switchScreen('vault')
+  haptic('light')
+})
+document.getElementById('btn-picker-save').addEventListener('click', () => {
+  savePickerNumbers()
+})
+document.getElementById('btn-picker-clear').addEventListener('click', () => {
+  clearPicker()
 })
 
 // Start

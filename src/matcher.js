@@ -12,7 +12,7 @@
  * 주의: 사용자가 3개만 생성한 경우 최대 5등까지만 확인 가능
  */
 
-import { getAllSaved, updateItem } from './storage.js'
+import { getAllSaved, updateItem, ensurePermanentNextDraw } from './storage.js'
 
 /**
  * 단일 번호 세트 매칭
@@ -92,6 +92,13 @@ export function checkAllPending(allData) {
     if (result.rank > 0) {
       newWinnings.push({ ...item, result, prizeInfo, drawNumbers: draw.numbers, drawBonus: draw.bonus_no })
     }
+  }
+
+  // 영구보관 그룹의 다음 회차 clone 자동 생성
+  const latest = allData[allData.length - 1]
+  if (latest) {
+    const cloned = ensurePermanentNextDraw(latest.draw_no)
+    if (cloned > 0) console.log('[Vault] 영구보관', cloned, '개 다음 회차 자동 재등록')
   }
 
   return { newWinnings, totalChecked }
