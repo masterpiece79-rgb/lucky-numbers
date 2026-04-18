@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@napi-rs/canvas": "^0.1.99",
     "vite": "^6.0.0"
   },
   "dependencies": {
