@@ -167,20 +167,29 @@ function showFallbackInterstitialAd() {
 }
 
 // 광고 로딩 중 인디케이터 (버튼 눌렀을 때 즉각 피드백)
+// 광고가 실제 뜰 때(onLoaded)나 fallback 진입 시까지 계속 보이게 함
 function showAdLoadingToast() {
-  showToast('광고 불러오는 중...', 5500)
+  // safety net 20초 — SDK가 멈춰도 토스트가 영구 남지는 않게
+  showToast('광고 불러오는 중...', 20000)
+}
+
+function hideAdLoadingToast() {
+  clearTimeout(showToast._t)
+  toastEl.classList.add('hidden')
 }
 
 async function showInterstitialAd() {
   showAdLoadingToast()
-  const shown = await showTossInterstitialAd()
+  const shown = await showTossInterstitialAd(hideAdLoadingToast)
+  hideAdLoadingToast()
   if (shown) return
   return showFallbackInterstitialAd()
 }
 
 async function showRewardedAd() {
   showAdLoadingToast()
-  const rewarded = await showTossRewardedAd()
+  const rewarded = await showTossRewardedAd(hideAdLoadingToast)
+  hideAdLoadingToast()
   if (rewarded) return true
   await showFallbackInterstitialAd()
   return true
