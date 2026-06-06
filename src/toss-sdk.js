@@ -76,14 +76,20 @@ const AD_GROUP_ID_INTERSTITIAL = 'ait.v2.live.4a2b351327de4a79' // 번호생성 
 const AD_GROUP_ID_REWARDED = 'ait.v2.live.3a7e1415be6c402e'     // 6개번호 보상형 광고
 
 /**
- * 토스 전면 광고 표시 (interstitial)
- * 환경 감지는 SDK 임포트 시도로 대체 (window.__APPS_IN_TOSS__ 체크 제거)
- * - ait 런타임: 임포트 성공 → 실제 광고
- * - 웹 프리뷰/비토스 환경: 임포트 실패 또는 광고 에러 → fallback
- * @param {Function} [onLoaded] - 광고 로드 완료 시 콜백 (로딩 UI 숨김용)
- * @returns {Promise<boolean>} 광고 표시 성공 여부
+ * 토스 풀스크린 광고 표시 (interstitial / rewarded 공용)
+ *
+ * SDK 시그니처(@apps-in-toss/web-bridge):
+ *   loadFullScreenAd({ options:{adGroupId}, onEvent, onError }) → cleanup()
+ *     onEvent: { type: 'loaded' }
+ *   showFullScreenAd({ options:{adGroupId}, onEvent, onError }) → cleanup()
+ *     onEvent: clicked|dismissed|failedToShow|impression|show|requested|userEarnedReward
+ *
+ * @param {string} adGroupId
+ * @param {Function} [onLoaded] - 광고가 화면에 뜨기 직전 호출 (로딩 UI 숨김용)
+ * @param {boolean} [trackReward] - 보상형(rewarded) 광고 여부
+ * @returns {Promise<boolean>} interstitial: 광고 노출됨 / rewarded: 보상 획득됨
  */
-export async function showTossInterstitialAd(onLoaded) {
+async function showFullScreenAdGeneric(adGroupId, onLoaded, trackReward = false) {
   try {
     const mod = await import('@apps-in-toss/web-framework')
     const { loadFullScreenAd, showFullScreenAd } = mod
@@ -93,119 +99,99 @@ export async function showTossInterstitialAd(onLoaded) {
       return false
     }
 
-    console.log('[Ad] 전면 광고 SDK 호출:', AD_GROUP_ID_INTERSTITIAL)
-    const ad = await loadFullScreenAd({ adGroupId: AD_GROUP_ID_INTERSTITIAL })
+    if (loadFullScreenAd.isSupported && !loadFullScreenAd.isSupported()) {
+      console.log('[Ad] loadFullScreenAd.isSupported() === false - 웹 모드')
+      return false
+    }
+
+    console.log('[Ad] 광고 로드 시작:', adGroupId, 'rewarded:', trackReward)
 
     return new Promise((resolve) => {
       let done = false
       let loaded = false
+      let rewarded = false
+      let cleanupLoad = null
+      let cleanupShow = null
+
+      const cleanupAll = () => {
+        try { cleanupLoad?.() } catch {}
+        try { cleanupShow?.() } catch {}
+      }
+
       const finish = (value) => {
         if (done) return
         done = true
+        cleanupAll()
         resolve(value)
       }
 
-      ad.on('loaded', async () => {
-        loaded = true
-        console.log('[Ad] 전면 광고 로드 완료')
-        if (onLoaded) { try { onLoaded() } catch {} }
-        try {
-          await showFullScreenAd(ad)
-        } catch (e) {
-          console.error('[Ad] 전면 광고 표시 실패:', e)
+      // 1) 광고 로드
+      cleanupLoad = loadFullScreenAd({
+        options: { adGroupId },
+        onEvent: (event) => {
+          console.log('[Ad] load event:', event?.type)
+          if (event?.type === 'loaded') {
+            loaded = true
+            if (onLoaded) { try { onLoaded() } catch {} }
+
+            // 2) 광고 표시
+            cleanupShow = showFullScreenAd({
+              options: { adGroupId },
+              onEvent: (showEvent) => {
+                console.log('[Ad] show event:', showEvent?.type)
+                if (showEvent?.type === 'userEarnedReward') {
+                  rewarded = true
+                } else if (showEvent?.type === 'dismissed') {
+                  finish(trackReward ? rewarded : true)
+                } else if (showEvent?.type === 'failedToShow') {
+                  finish(false)
+                }
+              },
+              onError: (err) => {
+                console.error('[Ad] show error:', err)
+                finish(false)
+              },
+            })
+          }
+        },
+        onError: (err) => {
+          console.error('[Ad] load error:', err)
+          finish(false)
+        },
+      })
+
+      // 5초 안에 loaded 이벤트 없으면 → fallback
+      setTimeout(() => {
+        if (!loaded) {
+          console.log('[Ad] loaded 이벤트 5초 무응답 - 웹 모드/광고 없음')
           finish(false)
         }
-      })
-
-      ad.on('dismissed', () => {
-        console.log('[Ad] 전면 광고 닫힘')
-        finish(true)
-      })
-
-      ad.on('error', (err) => {
-        console.error('[Ad] 전면 광고 에러:', err)
-        finish(false)
-      })
-
-      // 5초 안에 loaded 이벤트 없으면 웹 모드로 판단 → fallback
-      setTimeout(() => {
-        if (!loaded) finish(false)
       }, 5000)
-      // 전체 60초 최대 (loaded 후엔 유저가 광고 볼 시간 여유)
-      setTimeout(() => finish(false), 60000)
+      // 전체 90초 backup
+      setTimeout(() => finish(false), 90000)
     })
   } catch (error) {
-    console.error('[Ad] 전면 광고 SDK 호출 실패:', error)
+    console.error('[Ad] SDK 호출 실패:', error)
     return false
   }
 }
 
 /**
- * 토스 보상형 광고 표시 (rewarded)
- * @param {Function} [onLoaded] - 광고 로드 완료 시 콜백 (로딩 UI 숨김용)
+ * 전면 광고 (번호 생성 시)
+ * @param {Function} [onLoaded]
+ * @returns {Promise<boolean>}
+ */
+export async function showTossInterstitialAd(onLoaded) {
+  return showFullScreenAdGeneric(AD_GROUP_ID_INTERSTITIAL, onLoaded, false)
+}
+
+/**
+ * 보상형 광고 (5게임 / 키워드 등)
+ * @param {Function} [onLoaded]
  * @returns {Promise<boolean>} 보상 획득 여부
  */
 export async function showTossRewardedAd(onLoaded) {
-  try {
-    const mod = await import('@apps-in-toss/web-framework')
-    const { loadFullScreenAd, showFullScreenAd } = mod
-
-    if (!loadFullScreenAd || !showFullScreenAd) {
-      console.log('[Ad] SDK 함수 없음 - 웹 모드')
-      return false
-    }
-
-    console.log('[Ad] 보상형 광고 SDK 호출:', AD_GROUP_ID_REWARDED)
-    const ad = await loadFullScreenAd({ adGroupId: AD_GROUP_ID_REWARDED })
-
-    return new Promise((resolve) => {
-      let rewarded = false
-      let done = false
-      let loaded = false
-      const finish = (value) => {
-        if (done) return
-        done = true
-        resolve(value)
-      }
-
-      ad.on('loaded', async () => {
-        loaded = true
-        console.log('[Ad] 보상형 광고 로드 완료')
-        if (onLoaded) { try { onLoaded() } catch {} }
-        try {
-          await showFullScreenAd(ad)
-        } catch (e) {
-          console.error('[Ad] 보상형 광고 표시 실패:', e)
-          finish(false)
-        }
-      })
-
-      ad.on('userEarnedReward', () => {
-        console.log('[Ad] 보상 획득!')
-        rewarded = true
-      })
-
-      ad.on('dismissed', () => {
-        console.log('[Ad] 보상형 광고 닫힘, rewarded:', rewarded)
-        finish(rewarded)
-      })
-
-      ad.on('error', (err) => {
-        console.error('[Ad] 보상형 광고 에러:', err)
-        finish(false)
-      })
-
-      // 5초 안에 loaded 이벤트 없으면 웹 모드로 판단 → fallback
-      setTimeout(() => {
-        if (!loaded) finish(false)
-      }, 5000)
-      // 전체 60초 최대 (loaded 후엔 유저가 광고 볼 시간 여유)
-      setTimeout(() => finish(false), 60000)
-    })
-  } catch (error) {
-    console.error('[Ad] 보상형 광고 SDK 호출 실패:', error)
-    return false
-  }
+  return showFullScreenAdGeneric(AD_GROUP_ID_REWARDED, onLoaded, true)
 }
 
 export function hapticFeedback(type = 'light') {
